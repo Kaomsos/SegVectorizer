@@ -1,0 +1,11 @@
+haishoku==1.1.8
+matplotlib==3.4.3
+numpy==1.21.2
+Pillow==8.4.0
+scikit_image==0.18.3
+scikit_learn==1.0.1
+scipy==1.7.1
+skimage==0.0
+torch==1.9.0
+torchtyping==0.1.4
+torchviz==0.0.2
