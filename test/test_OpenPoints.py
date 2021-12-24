@@ -13,7 +13,8 @@ class TestOpenPointExtraction(unittest.TestCase):
         self.palette = self.img.getcolors()
 
     def test_find_door_window(self):
-        from geometry import find_connected_components, palette
+        from geometry import find_connected_components
+        from utils import palette
         from utils import plot_binary_image
 
         self._init(path='data/flat_1.png')
@@ -27,7 +28,7 @@ class TestOpenPointExtraction(unittest.TestCase):
             plot_binary_image(dw.array, title=f"component {i + 1}")
             # assert bbox attribute
             self.assertTrue(isinstance(dw.bbox, tuple) and len(dw.bbox) == 2)
-            # assert boundary attribute
+            # assert add_boundary attribute
             self.assertTrue(isinstance(dw.boundary, np.ndarray)
                             and len(dw.boundary.shape) == 2
                             and dw.boundary.shape[1] == 2)
@@ -36,7 +37,8 @@ class TestOpenPointExtraction(unittest.TestCase):
         plot_binary_image(self.all_cc, "all components")
 
     def test_rect_fit(self):
-        from geometry import find_connected_components, palette
+        from geometry import find_connected_components
+        from utils import palette
         from room_contour_optimization import RectangleOptimizer
 
         # get all door/window components
@@ -207,7 +209,8 @@ class TestPCA(unittest.TestCase):
         self.palette = self.img.getcolors()
 
     def test_find_door_window(self):
-        from geometry import find_connected_components, palette
+        from geometry import find_connected_components
+        from utils import palette
         from utils import plot_binary_image
 
         self._init(path='data/flat_1.png')
@@ -224,7 +227,7 @@ class TestPCA(unittest.TestCase):
 
             # assert bbox attribute
             self.assertTrue(isinstance(dw.bbox, tuple) and len(dw.bbox) == 2)
-            # assert boundary attribute
+            # assert add_boundary attribute
             self.assertTrue(isinstance(dw.boundary, np.ndarray)
                             and len(dw.boundary.shape) == 2
                             and dw.boundary.shape[1] == 2)
@@ -233,7 +236,8 @@ class TestPCA(unittest.TestCase):
         plot_binary_image(self.all_cc, "all components")
 
     def test_PCA(self):
-        from geometry import find_connected_components, palette
+        from geometry import find_connected_components
+        from utils import palette
         from entity_class import SingleConnectedComponent
         from sklearn.decomposition import PCA
 

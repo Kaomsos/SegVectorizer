@@ -12,7 +12,8 @@ class TestFindConnectedComponents(unittest.TestCase):
         self.palette = self.img.getcolors()
 
     def test_find_components(self):
-        from geometry import find_connected_components, palette
+        from geometry import find_connected_components
+        from utils import palette
         self.test_init()
         for color in palette.values():
             c = find_connected_components(self.img, color, 0)
@@ -35,7 +36,7 @@ class TestFindConnectedComponents(unittest.TestCase):
         self.test_init()
 
         all_ = find_boundaries(self.img, threshold=5)
-        # for type_ in ['bathroom/washroom', 'livingroom/kitchen/dining room',
+        # for type_ in ['bathroom/washroom', 'livingroom/kitchen/dining add_room',
         #           'bedroom', 'hall', 'balcony', 'closet']:
         #     ccs = find_connected_components(self.img, palette[type_], threshold=0)
         #     print(f'n_connected_components = {len(ccs)} for type: {type_}')

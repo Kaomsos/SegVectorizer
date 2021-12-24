@@ -57,7 +57,7 @@ class SingleConnectedComponent(BinaryImage):
         if threshold > 1:
             (x_min, y_min), (x_max, y_max) = inst.bbox
             if max(x_max - x_min, y_max - y_min) < threshold:
-                return
+                return None
 
         # init contours
         inst._init_contours(filter_factor=0.9)
@@ -298,7 +298,7 @@ class WallCenterLine(UndirectedGraph):
         start = 0
 
         ###############################################
-        # iterate over all room contours (Polygon):
+        # iterate over all add_room contours (Polygon):
         # 1. gathering all the 2d coordinates
         # 2. construct a UndirectedGraph
         for c in room_contours:

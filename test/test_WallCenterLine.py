@@ -12,7 +12,7 @@ class TestWallCenterOptimization(unittest.TestCase):
         from utils import plot_wcl_against_target
         from geometry import find_boundaries
 
-        # get boundary
+        # get add_boundary
         path = path = 'data/flat_0.png'
         self.img = Image.open(path)
         self.boundary = np.zeros(self.img.size[::-1], dtype=int)

@@ -88,3 +88,18 @@ def viz_computation_graph(var: torch.Tensor,
         dot.render(path, format='png')
     else:
         pass
+
+
+palette = {
+     'background': (255, 255, 255),
+     'closet': (192, 192, 224),
+     'bathroom/washroom': (192, 255, 255),
+     'livingroom/kitchen/dining add_room': (224, 255, 192),
+     'bedroom': (255, 224, 128),
+     'hall': (255, 160, 96),
+     'balcony': (255, 224, 224),
+     7: (224, 224, 224),  # not used
+     8: (224, 224, 128),  # not used
+     'door&window': (255, 60, 128),
+     'wall': (0, 0, 0)
+}

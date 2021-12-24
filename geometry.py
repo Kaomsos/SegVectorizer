@@ -6,6 +6,7 @@ from typing import Tuple, List, Dict
 from typing_ import SegmentCollection
 from skimage.measure import label
 from entity_class import SingleConnectedComponent
+from utils import palette
 
 EPSILON = 1e-2
 
@@ -158,6 +159,13 @@ def find_connected_components(img,
                               color: Tuple[int, int, int],
                               threshold: float = 5
                               ) -> List[SingleConnectedComponent]:
+    """
+    find connected components given color
+    :param img:
+    :param color:
+    :param threshold:
+    :return:
+    """
     arr = np.array(img)[..., :3]
     assert len(arr.shape) == 3
     assert arr.shape[-1] == 3
@@ -189,7 +197,7 @@ def find_rooms(img, threshold=10) -> Dict[str, List[SingleConnectedComponent]]:
     :return:
     """
     rooms = {}
-    for type_ in ['bathroom/washroom', 'livingroom/kitchen/dining room',
+    for type_ in ['bathroom/washroom', 'livingroom/kitchen/dining add_room',
                   'bedroom', 'hall', 'balcony', 'closet']:
         cc = find_connected_components(img, palette[type_], threshold=threshold)
         rooms[type_] = cc
@@ -210,18 +218,3 @@ def find_boundaries(img, threshold=0) -> List[SingleConnectedComponent]:
         boundaries += cc
     return boundaries
 
-
-
-palette = {
-     'background': [255, 255, 255],
-     'closet': [192, 192, 224],
-     'bathroom/washroom': [192, 255, 255],
-     'livingroom/kitchen/dining room': [224, 255, 192],
-     'bedroom': [255, 224, 128],
-     'hall': [255, 160, 96],
-     'balcony': [255, 224, 224],
-     7: [224, 224, 224],  # not used
-     8: [224, 224, 128],  # not used
-     'door&window': [255, 60, 128],
-     'wall': [0, 0, 0]
-}
