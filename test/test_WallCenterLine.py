@@ -13,7 +13,7 @@ class TestWallCenterOptimization(unittest.TestCase):
         from geometry import find_boundaries
 
         # get add_boundary
-        path = path = 'data/flat_0.png'
+        path = path = '../data/flat_0.png'
         self.img = Image.open(path)
         self.boundary = np.zeros(self.img.size[::-1], dtype=int)
         for cc in find_boundaries(self.img):
@@ -22,7 +22,7 @@ class TestWallCenterOptimization(unittest.TestCase):
         plt.imshow(self.boundary, cmap='gray')
         plt.show()
 
-        path = 'data/countours-1.pickle'
+        path = '../data/countours-1.pickle'
         with open(path, 'rb') as f:
             self.contours = pickle.load(f)
 
@@ -35,7 +35,7 @@ class TestWallCenterOptimization(unittest.TestCase):
 
         # construct a graph from contours
         self.wcl = WallCenterLine(self.contours)
-        plot_wcl_against_target(self.boundary + np.nan, self.wcl, title="initial state")
+        plot_wcl_against_target(self.wcl, self.boundary + np.nan, title="initial state")
 
     def test_k_neighbor(self):
         from sklearn.neighbors import kneighbors_graph
@@ -98,7 +98,7 @@ class TestWallCenterOptimization(unittest.TestCase):
 
         self.test_init_()
 
-        plot_wcl_against_target(self.boundary, self.wcl, title='before processing')
+        plot_wcl_against_target(self.wcl, self.boundary, title='before processing')
 
         reducer = wclo.VertexReducer(self.wcl)
 
@@ -113,11 +113,11 @@ class TestWallCenterOptimization(unittest.TestCase):
         from utils import plot_wcl_against_target
 
         self.test_junction_reduction()
-        plot_wcl_against_target(self.boundary, self.wcl, title='after reduction')
+        plot_wcl_against_target(self.wcl, self.boundary, title='after reduction')
 
         self.optimizer = wclo.CoordinateOptimizer(self.wcl, max_iter=10, lr=0.1)
         self.optimizer.fit(self.boundary, verbose=True)
-        plot_wcl_against_target(self.boundary, self.wcl, title='after optimization')
+        plot_wcl_against_target(self.wcl, self.boundary, title='after optimization')
 
     def test_alternating_optimization(self):
         from wall_centerline_optimization import VertexReducer, CoordinateOptimizer
@@ -125,7 +125,7 @@ class TestWallCenterOptimization(unittest.TestCase):
 
         self.test_init_()
 
-        plot_wcl_against_target(self.boundary, self.wcl, title='before processing')
+        plot_wcl_against_target(self.wcl, self.boundary, title='before processing')
 
         reducer = VertexReducer(self.wcl)
         optimizer = CoordinateOptimizer(self.wcl, downscale=4, max_iter=10, lr=0.1)
@@ -135,16 +135,16 @@ class TestWallCenterOptimization(unittest.TestCase):
         for i in range(max_iter):
             reducer._flag = True
             reducer.reduce_by_condition_x(10)
-            plot_wcl_against_target(self.boundary + np.nan, self.wcl, title=f'iter={i + 1}, after condition x')
+            plot_wcl_against_target(self.wcl, self.boundary + np.nan, title=f'iter={i + 1}, after condition x')
 
             reducer.reduce_by_condition_y(10)
-            plot_wcl_against_target(self.boundary + np.nan, self.wcl, title=f'iter={i + 1}, after condition y')
+            plot_wcl_against_target(self.wcl, self.boundary + np.nan, title=f'iter={i + 1}, after condition y')
             if reducer.stop:
                 print('meet stopping criterion')
                 break
-            plot_wcl_against_target(self.boundary, self.wcl, title=f'iter={i + 1}, before optimization')
+            plot_wcl_against_target(self.wcl, self.boundary, title=f'iter={i + 1}, before optimization')
             optimizer.fit(self.boundary, verbose=False)
-            plot_wcl_against_target(self.boundary, self.wcl, title=f'iter={i + 1}, after optimization')
+            plot_wcl_against_target(self.wcl, self.boundary, title=f'iter={i + 1}, after optimization')
         print("--------------------end--------------------")
 
         # serialization

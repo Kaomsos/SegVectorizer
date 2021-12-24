@@ -91,7 +91,7 @@ class CoordinateOptimizer:
             ):
         self._verbose = verbose
         self._target = target
-        self._init_fit(target)
+        self._fit_init(target)
         for i in range(self._max_iter):
             self._i = i
             L = self._objective()
@@ -100,7 +100,7 @@ class CoordinateOptimizer:
             self._hook_after_step()
         self._update_wlc()
 
-    def _init_fit(self, target):
+    def _fit_init(self, target):
         #################
         # variable
         self.V = torch.tensor(self._wcl.V, dtype=self._dtype, requires_grad=True)
@@ -154,3 +154,24 @@ class CoordinateOptimizer:
     def optimized_result(self) -> np.ndarray:
         return self.V.detach().numpy()
 
+
+def alternating_optimize(wcl: WallCenterLine,
+                         boundary: np.ndarray,
+                         delta_x: float = 10,
+                         delta_y: float = 10,
+                         downscale: int = 4,
+                         max_alt_iter: int = 5,
+                         max_coord_iter: int = 10
+                         ) -> WallCenterLine:
+    reducer = VertexReducer(wcl, delta_x, delta_y)
+    optimizer = CoordinateOptimizer(wcl, downscale=downscale, max_iter=max_coord_iter, lr=0.1)
+
+    # iterating for at most max_iter
+    for i in range(max_alt_iter):
+        reducer._flag = True
+        reducer.reduce()
+        if reducer.stop:
+            break
+        optimizer.fit(boundary, verbose=False)
+
+    return wcl

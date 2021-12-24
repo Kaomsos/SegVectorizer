@@ -25,16 +25,16 @@ class TestRoomContourOptimization(unittest.TestCase):
         from image_reader import BinaryImageFromFile
         from entity_class import Polygon
         from room_contour_optimization import VertexReducer
-        from utils import plot_polygon
+        from utils import plot_polygon_comparing_cc
 
         path = "data/rect2.jpg"
         img = BinaryImageFromFile(path)
         plg = Polygon(arr=img.array, tol=0)
-        plot_polygon(img, plg)
+        plot_polygon_comparing_cc(img, plg)
         for d in [0, 20, 30, 40, 50, 60]:
             reducer = VertexReducer(plg=plg, delta_a=0, delta_b=d)
             reducer.reduce()
-            plot_polygon(img, plg)
+            plot_polygon_comparing_cc(img, plg)
         pass
 
     def test_coordinate_optimization(self):
@@ -74,7 +74,7 @@ class TestRoomContourOptimization(unittest.TestCase):
             print(f"iter = {i + 1}, gradient = {plg.grad}, -log_iou = {-iou.detach().numpy()}")
 
     def test_alternating_optimization(self):
-        from utils import plot_polygon, plot_contours
+        from utils import plot_polygon_comparing_cc, plot_contours
         from entity_class import Polygon
         self.test_init()
         opt_contours = []
@@ -96,7 +96,7 @@ class TestRoomContourOptimization(unittest.TestCase):
 
     @staticmethod
     def alternating_optimizing(cc):
-        from utils import plot_polygon, plot_contours
+        from utils import plot_polygon_comparing_cc, plot_contours
         from entity_class import Polygon
         from room_contour_optimization import VertexReducer
         from room_contour_optimization import CoordinateOptimizer
@@ -107,9 +107,9 @@ class TestRoomContourOptimization(unittest.TestCase):
         opt = CoordinateOptimizer(target=cc, max_iter=0, sigma=10)
         print(f'num_vertices = {len(plg)}')
         for _ in range(5):
-            plot_polygon(cc, plg)
+            plot_polygon_comparing_cc(cc, plg)
             reducer.reduce()
-            plot_polygon(cc, plg)
+            plot_polygon_comparing_cc(cc, plg)
             print(f'num_vertices = {len(plg)}')
             if reducer.stop:
                 print('--- meet stopping criterion! ---')

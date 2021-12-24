@@ -4,12 +4,15 @@ import torch
 from matplotlib import pyplot as plt
 from torchviz import make_dot
 from entity_class import BinaryImage, Polygon, WallCenterLine
-# from typing_ import WallCenterLine, BinaryImage, Polygon
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from typing_ import WallCenterLine, Polygon
 import warnings
 
 __all__ = ["plot_binary_image",
            "plot_labeled_image",
            "plot_contours",
+           'plot_polygon_comparing_cc',
            'plot_polygon',
            'plot_wall_center_lines',
            'plot_wcl_against_target',
@@ -28,16 +31,17 @@ def plot_labeled_image(bin_arr):
     plt.show()
 
 
-def plot_contours(connected_component):
+def plot_contours(connected_component, show=True):
     warnings.filterwarnings('ignore')
     plt.imshow(connected_component.array + np.nan, cmap='gray')
     for c in connected_component.contours:
         plt.plot(c[..., 0], c[..., 1])
-    plt.show()
+    if show:
+        plt.show()
     warnings.filterwarnings('default')
 
 
-def plot_polygon(bin_img: BinaryImage, plg: Polygon):
+def plot_polygon_comparing_cc(bin_img: BinaryImage, plg: Polygon):
     warnings.filterwarnings('ignore')
     plt.subplot(1, 2, 2)
     plt.imshow(1 - bin_img.array, cmap='gray')
@@ -50,6 +54,12 @@ def plot_polygon(bin_img: BinaryImage, plg: Polygon):
 
     plt.show()
     warnings.filterwarnings('default')
+
+
+def plot_polygon(plg: Polygon, show=False):
+    plt.plot(plg.plot_x, plg.plot_y, marker='+')
+    if show:
+        plt.show()
 
 
 def plot_wall_center_lines(wcl: WallCenterLine, annotation=True, title: str = "", show=True):
@@ -70,7 +80,7 @@ def plot_wall_center_lines(wcl: WallCenterLine, annotation=True, title: str = ""
         plt.show()
 
 
-def plot_wcl_against_target(target, wcl, title=''):
+def plot_wcl_against_target(wcl, target, title=''):
     plt.imshow(1 - target, cmap='gray')
     plot_wall_center_lines(wcl, title=title, show=False)
     plt.show()

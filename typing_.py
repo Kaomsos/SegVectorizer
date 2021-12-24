@@ -7,7 +7,6 @@ from torch import Tensor
 import numpy as np
 
 
-
 Edge = Tuple[int, int]
 EdgeCollection = Collection[Edge]
 
@@ -29,5 +28,5 @@ import entity_class
 SingleConnectedComponent = entity_class.SingleConnectedComponent
 Polygon = entity_class.Polygon
 Contour = Polygon
-
+WallCenterLine = entity_class.WallCenterLine
 
