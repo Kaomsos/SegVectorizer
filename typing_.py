@@ -27,4 +27,7 @@ Palette = Dict[str, Color]
 # to deal with circular import
 import entity_class
 SingleConnectedComponent = entity_class.SingleConnectedComponent
+Polygon = entity_class.Polygon
+Contour = Polygon
+
 
