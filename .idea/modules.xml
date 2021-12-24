@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/MySoftRas.iml" filepath="$PROJECT_DIR$/.idea/MySoftRas.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/SegVectorizer.iml" filepath="$PROJECT_DIR$/.idea/SegVectorizer.iml" />
     </modules>
   </component>
 </project>
