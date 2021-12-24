@@ -1,6 +1,8 @@
 from __future__ import annotations
-from typing import Tuple, List, Optional
-from typing_ import EdgeCollection, AdjacentList, Vertex, Edge
+from typing import Tuple, List, Optional, TYPE_CHECKING
+if TYPE_CHECKING:
+    from typing_ import EdgeCollection, AdjacentList, Vertex, Edge
+
 import numpy as np
 import torch
 from skimage.measure import find_contours, approximate_polygon
@@ -322,6 +324,11 @@ class WallCenterLine(UndirectedGraph):
 
         ###############################
         # defining mappings
+        # Sets:
+        #       i: a indices of v whose values are a natural sequence
+        #       v: all vertices in current adjacency list (graph)
+        #       p: all vertices in the initial adjacency list (graph)
+        #       j: a indices of p whose values are a natural sequence
         ###############################
         # p2j and j2p are determined by the init codes above
         # and are somehow constant
@@ -418,13 +425,15 @@ class WallCenterLine(UndirectedGraph):
         if i == j:
             return
         indices = list(range(self._n))
-        indices.pop(remove_which)
 
         super(WallCenterLine, self).merge_vertices(i, j)
 
         self._cur_coordinates[update_which] = (self._cur_coordinates[update_which]
                                                + self._cur_coordinates[remove_which]) / 2
+
+        indices.pop(remove_which)
         self._cur_coordinates = self._cur_coordinates[indices]
+
         self._p2v[j] = i
         self._v2i = dict(zip(self._adjacency_list.keys(), range(self._n)))
         self._i2v = dict(zip(range(self._n), self._adjacency_list.keys()))
