@@ -35,10 +35,17 @@ class TestVectorizer(unittest.TestCase):
         self.vectorizer = Vectorizer(palette=palette, palette_config=p_config)
 
     def test_vectorizer_get_components(self):
-        self._init(path='../data/flat_1.png')
-        segmentation = np.array(self.img)
-        self.vectorizer._vectorize(segmentation)
+        from typing_ import SingleConnectedComponent
 
+        self._init(path='../data/flat_1.png')
+
+        segmentation = np.array(self.img)
+
+        c1, c2, c3 = self.vectorizer._extract_connected_components(segmentation)
+        for ccs in [c1, c2, c3]:
+            self.assertTrue(isinstance(ccs, list))
+            for cc in ccs:
+                self.assertTrue(isinstance(cc, SingleConnectedComponent))
 
 
 
