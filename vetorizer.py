@@ -5,7 +5,7 @@ if TYPE_CHECKING:
 
 import numpy as np
 
-from entity_class import WallCenterLine
+from entity.graph import WallCenterLine
 from geometry import find_connected_components
 from room_contour_optimization import alternating_optimize as fit_room_contour
 from wall_centerline_optimization import alternating_optimize as fit_wall_center_line
@@ -134,9 +134,9 @@ class Vectorizer:
 
     def _set_hyper_parameters_by_rectangles(self, rects: List[Rectangle]) -> None:
         wall_width = np.array([(rect.w, rect.h) for rect in rects]).min(axis=-1).mean()
-        self._delta_a = wall_width * 2.5
-        self._delta_x = wall_width * 2.5
-        self._delta_y = wall_width * 2.5
+        self._delta_a = wall_width * 2
+        self._delta_x = wall_width * 2
+        self._delta_y = wall_width * 2
 
     def _get_room_contour(self, cc: SingleConnectedComponent) -> Contour:
         contour = fit_room_contour(cc,

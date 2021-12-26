@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 from sklearn.decomposition import PCA
 import numpy as np
 
-from entity_class import Rectangle
+from entity.polygon import Rectangle
 
 
 class RectangleFitter(ABC):

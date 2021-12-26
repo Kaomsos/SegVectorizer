@@ -5,7 +5,7 @@ from typing_ import SingleConnectedComponent, Contour
 import numpy as np
 import torch
 
-from entity_class import Polygon
+from entity.polygon import Polygon
 from rasterizer import Base2DPolygonRasterizer as SoftRasterizer
 from objective import log_iou, boundary, orthogonal
 from torch.optim import RMSprop

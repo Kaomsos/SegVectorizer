@@ -238,7 +238,7 @@ class TestPCA(unittest.TestCase):
     def test_PCA(self):
         from geometry import find_connected_components
         from utils import palette
-        from entity_class import SingleConnectedComponent
+        from entity.image import SingleConnectedComponent
         from sklearn.decomposition import PCA
 
         self._init(path='data/flat_1.png')

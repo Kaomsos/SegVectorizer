@@ -5,7 +5,9 @@ import matplotlib.pyplot as plt
 import torch
 from torch.optim import RMSprop
 
-from entity_class import WallCenterLine, SingleConnectedComponent, SemiIdentityMapping
+from entity.mapping import SemiIdentityMapping
+from entity.graph import WallCenterLine
+from entity.image import SingleConnectedComponent
 from sklearn.neighbors import kneighbors_graph
 from geometry import distance_p_to_segments
 from objective import center, nearby, alignment

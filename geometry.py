@@ -5,7 +5,7 @@ from torch import Tensor
 from typing import Tuple, List, Dict
 from typing_ import SegmentCollection
 from skimage.measure import label
-from entity_class import SingleConnectedComponent
+from entity.image import SingleConnectedComponent
 from utils import palette
 
 EPSILON = 1e-2

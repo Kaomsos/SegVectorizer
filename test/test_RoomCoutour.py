@@ -23,7 +23,7 @@ class TestRoomContourOptimization(unittest.TestCase):
 
     def test_vertices_reduction(self):
         from image_reader import BinaryImageFromFile
-        from entity_class import Polygon
+        from entity.polygon import Polygon
         from room_contour_optimization import VertexReducer
         from utils import plot_polygon_comparing_cc
 
@@ -75,7 +75,7 @@ class TestRoomContourOptimization(unittest.TestCase):
 
     def test_alternating_optimization(self):
         from utils import plot_polygon_comparing_cc, plot_contours
-        from entity_class import Polygon
+        from entity.polygon import Polygon
         self.test_init()
         opt_contours = []
         for i, cc in enumerate(self.rooms):
@@ -97,7 +97,7 @@ class TestRoomContourOptimization(unittest.TestCase):
     @staticmethod
     def alternating_optimizing(cc):
         from utils import plot_polygon_comparing_cc, plot_contours
-        from entity_class import Polygon
+        from entity.polygon import Polygon
         from room_contour_optimization import VertexReducer
         from room_contour_optimization import CoordinateOptimizer
 

@@ -1,5 +1,5 @@
 from unittest import TestCase
-from entity_class import SemiIdentityMapping
+from entity.mapping import SemiIdentityMapping
 
 
 class TestSemiIdentityMapping(TestCase):

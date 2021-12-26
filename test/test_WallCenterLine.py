@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 class TestWallCenterOptimization(unittest.TestCase):
     def test_init_(self):
         import pickle
-        from entity_class import WallCenterLine
+        from entity.graph import WallCenterLine
         from utils import plot_wcl_against_target
         from geometry import find_boundaries
 
@@ -57,7 +57,7 @@ class TestWallCenterOptimization(unittest.TestCase):
         pass
 
     def test_undirected_graph(self):
-        from entity_class import UndirectedGraph
+        from entity.graph import UndirectedGraph
         n_v = 6
         edges = [(0, 1), (1, 2), (2, 3), (3, 4), (4, 0)]
         g = UndirectedGraph(n_v, edges)

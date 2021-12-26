@@ -3,7 +3,7 @@ from __future__ import annotations
 from PIL import Image
 from pathlib import Path
 
-from entity_class import BinaryImage
+from entity.image import BinaryImage
 import numpy as np
 
 

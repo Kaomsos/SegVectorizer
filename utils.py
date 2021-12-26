@@ -3,7 +3,9 @@ import numpy as np
 import torch
 from matplotlib import pyplot as plt, pyplot
 from torchviz import make_dot
-from entity_class import BinaryImage, Polygon, WallCenterLine
+from entity.graph import WallCenterLine
+from entity.image import BinaryImage
+from entity.polygon import Polygon
 from typing import TYPE_CHECKING, List
 if TYPE_CHECKING:
     from typing_ import WallCenterLine, Polygon, Rectangle

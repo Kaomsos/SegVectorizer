@@ -42,7 +42,7 @@ class TestVectorizer(unittest.TestCase):
         self.vectorizer = Vectorizer(palette=palette, palette_config=p_config)
 
     def test_vectorizer_get_components(self):
-        from entity_class import SingleConnectedComponent
+        from entity.image import SingleConnectedComponent
 
         self._init(path='../data/flat_1.png')
 
@@ -81,7 +81,7 @@ class TestVectorizer(unittest.TestCase):
     def test_vectorize(self):
         import pickle
         from utils import plot_wcl_against_target, plot_position_of_rects
-        self._init(path='../data/flat_1.png')
+        self._init(path='../data/flat_0.png')
 
         self.vectorizer._vectorize(self.segmentation)
 
