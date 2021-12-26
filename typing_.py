@@ -6,9 +6,8 @@ from torchtyping import TensorType
 from torch import Tensor
 import numpy as np
 
-import entity.graph
-import entity.image
-import entity.polygon
+import entity
+
 
 Edge = Tuple[int, int]
 EdgeCollection = Collection[Edge]
@@ -25,9 +24,7 @@ SegmentCollection = Tuple[PointCollection, PointCollection]
 Color = Union[int, Tuple[int, int, int]]
 Palette = Dict[str, Color]
 
-# sort of "lazy import"
-# to deal with circular import
-import entity
+
 SingleConnectedComponent = entity.image.SingleConnectedComponent
 Polygon = entity.polygon.Polygon
 Rectangle = entity.polygon.Rectangle
