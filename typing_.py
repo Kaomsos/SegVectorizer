@@ -32,7 +32,8 @@ Contour = Polygon
 WallCenterLine = entity.graph.WallCenterLine
 
 
-Coordinate2D = Tuple[float, float]
+Coordinate2D = Point = Union[Tuple[float, float], np.ndarray]
+Segment = Tuple[Point, Point]
 Radius = float
 Length = float
 Vector2D = Tuple[float, float]

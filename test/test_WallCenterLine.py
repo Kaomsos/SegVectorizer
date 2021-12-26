@@ -161,3 +161,15 @@ class TestWallCenterOptimization(unittest.TestCase):
         self.wcl.append_vertex_to_edge(v, e)
         plot_wall_center_lines(self.wcl, title=f"append vertex {v} to edge {e}")
 
+
+class TestWallCenterLine(unittest.TestCase):
+    def _init(self, path='../data/wcl-1.pickle'):
+        import pickle
+        with open(path, 'rb') as f:
+            self.wcl = pickle.load(f)
+
+    def test_wcl_with_open(self):
+        from entity.graph import WallCenterLineWithOpenPoints
+        self._init()
+        self.wcl_o = WallCenterLineWithOpenPoints.from_wcl(self.wcl)
+        pass

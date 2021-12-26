@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import List, TYPE_CHECKING, Tuple
+from typing import List, TYPE_CHECKING, Tuple, Dict
 
 import numpy as np
 from scipy.sparse import csr_matrix
@@ -8,7 +8,7 @@ from .polygon import Polygon
 from .mapping import SemiIdentityMapping
 
 if TYPE_CHECKING:
-    from typing_ import EdgeCollection, AdjacentList, Vertex, Edge
+    from typing_ import EdgeCollection, AdjacentList, Vertex, Edge, Coordinate2D, Segment
 
 
 class UndirectedGraph:
@@ -256,19 +256,19 @@ class WallCenterLine(UndirectedGraph):
         return m.toarray()
 
     @property
-    def V(self):
+    def V(self) -> np.ndarray:
         return self._cur_coordinates
 
     @property
-    def P(self):
+    def P(self) -> np.ndarray:
         return self._init_coordinates
 
     @property
-    def i2v(self):
+    def i2v(self) -> Dict[int, Vertex]:
         return self._i2v
 
     @property
-    def i2e(self):
+    def i2e(self) -> Dict[int, Edge]:
         edges = self.edges
         n_edges = len(edges)
         mapping = dict(zip(range(n_edges), edges))
@@ -280,7 +280,11 @@ class WallCenterLine(UndirectedGraph):
         S_p, E_p = S @ self._cur_coordinates, E @ self._cur_coordinates
         return S_p, E_p
 
-    def merge_vertices(self, i, j):
+    def get_coordinate_by_v(self, v: Vertex) -> np.ndarray | Coordinate2D:
+        i = self._v2i[v]
+        return self._cur_coordinates[i]
+
+    def merge_vertices(self, i: Vertex, j: Vertex):
         update_which = self._v2i[i]
         remove_which = self._v2i[j]
         if i == j:
@@ -296,6 +300,9 @@ class WallCenterLine(UndirectedGraph):
         self._cur_coordinates = self._cur_coordinates[indices]
 
         self._p2v[j] = i
+        self._update_v2i_i2v()
+
+    def _update_v2i_i2v(self):
         self._v2i = dict(zip(self._adjacency_list.keys(), range(self._n)))
         self._i2v = dict(zip(range(self._n), self._adjacency_list.keys()))
 
@@ -309,5 +316,45 @@ class WallCenterLine(UndirectedGraph):
 
 
 class WallCenterLineWithOpenPoints(WallCenterLine):
-    def __init__(self, wcl: WallCenterLine):
-        pass
+    def __init__(self):
+        self._open_edge = []
+        self._door_edge = []
+        self._window_edge = []
+
+    @classmethod
+    def from_wcl(cls, wcl: WallCenterLine):
+        inst = cls()
+        inst.__dict__.update(wcl.__dict__)
+        return inst
+
+    def add_vertex(self, coord: Coordinate2D) -> Vertex:
+        v = super(WallCenterLineWithOpenPoints, self).add_vertex()
+        self._cur_coordinates = np.append(self._cur_coordinates, coord, axis=0)
+        self._update_v2i_i2v()
+        return v
+
+    def insert_open_to_edge(self, seg: Segment, e: Edge):
+        self._check_edge_exists(e)
+        e1 = self.get_coordinate_by_v(e[0])
+        e2 = self.get_coordinate_by_v(e[1])
+
+        p1, p2 = seg
+        v1 = self.add_vertex(p1)
+        v2 = self.add_vertex(p2)
+        self.connect_vertices(v1, v2)
+
+        # use L1 distance for comparing
+        if np.abs(p1 - e1).sum() < np.abs(p2 - e1).sum():
+            to_e1 = v1
+        else:
+            to_e1 = v2
+
+        if np.abs(p1 - e2).sum() < np.abs(p2 - e2).sum():
+            to_e2 = v1
+        else:
+            to_e2 = v2
+
+        self.connect_vertices(e[0], to_e1)
+        self.connect_vertices(e[1], to_e2)
+
+
