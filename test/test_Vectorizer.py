@@ -16,6 +16,7 @@ class TestVectorizer(unittest.TestCase):
         from utils import palette
 
         self.img = Image.open(path)
+        self.segmentation = np.array(self.img)
 
         p_config = PaletteConfiguration()
         p_config.add_open("door&window")
@@ -82,15 +83,13 @@ class TestVectorizer(unittest.TestCase):
         from utils import plot_wcl_against_target, plot_position_of_rects
         self._init(path='../data/flat_1.png')
 
-        segmentation = np.array(self.img)
+        self.vectorizer._vectorize(self.segmentation)
 
-        opens, boundary, rooms = self.vectorizer._extract_connected_components(segmentation)
-        rects = [self.vectorizer._get_rectangle(o) for o in opens]
+        # with open("../data/wcl-1.pickle", 'rb') as f:
+        #     self.wcl = pickle.load(f)
 
-        with open("../data/wcl-1.pickle", 'rb') as f:
-            self.wcl = pickle.load(f)
-        plot_wcl_against_target(self.wcl, boundary, show=False)
-        plot_position_of_rects(rects, color='red', show=False)
+        plot_wcl_against_target(self.vectorizer.wcl, self.vectorizer.boundary, show=False)
+        plot_position_of_rects(self.vectorizer.rects, color='red', show=False)
         plt.show()
 
     def plot_contours_against_image(self, contours: List[Polygon]):

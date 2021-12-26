@@ -5,6 +5,7 @@ if TYPE_CHECKING:
 
 import numpy as np
 
+from entity_class import WallCenterLine
 from geometry import find_connected_components
 from room_contour_optimization import alternating_optimize as fit_room_contour
 from wall_centerline_optimization import alternating_optimize as fit_wall_center_line
@@ -70,9 +71,13 @@ class Vectorizer:
         self._room_threshold = 10
 
         # max iteration number of optimizations
+        self._delta_a = None
+        self._delta_b = 10
         self._max_iter_room_alt_opt = 5
         self._max_iter_room_coord_opt = 0
 
+        self._delta_x = None
+        self._delta_y = None
         self._downscale = 5
         self._max_iter_wcl_alt_opt = 5
         self._max_iter_wcl_coord_opt = 5
@@ -86,12 +91,21 @@ class Vectorizer:
                                  for cls in config.rooms if cls in self._palette.keys()])
 
     def _vectorize(self, segmentation):
+        # init and get hyper_paramenters
         open_cc, boundary_cc, room_cc = self._extract_connected_components(segmentation)
-
         rects: List[Rectangle] = [self._get_rectangle(o) for o in open_cc]
 
+        self._set_hyper_parameters_by_rectangles(rects)
+
+        # room contour optimization
         room_contours: List[Contour] = [self._get_room_contour(cc) for cc in room_cc]
+
+        # wall center line optimization
         wcl = self._get_wall_center_line(room_contours, boundary_cc)
+
+        self.rects = rects
+        self.boundary = boundary_cc
+        self.wcl = wcl
 
     def _extract_connected_components(self, segmentation):
         open_cc: List[SingleConnectedComponent] = []
@@ -118,19 +132,28 @@ class Vectorizer:
         rect = fit_open_points(open_)
         return rect
 
+    def _set_hyper_parameters_by_rectangles(self, rects: List[Rectangle]) -> None:
+        wall_width = np.array([(rect.w, rect.h) for rect in rects]).min(axis=-1).mean()
+        self._delta_a = wall_width * 1.5
+        self._delta_x = wall_width * 2.5
+        self._delta_y = wall_width * 2.5
+
     def _get_room_contour(self, cc: SingleConnectedComponent) -> Contour:
         contour = fit_room_contour(cc,
+                                   delta_a=self._delta_a,
+                                   delta_b=self._delta_b,
                                    max_alt_iter=self._max_iter_room_alt_opt,
-                                   max_coord_iter=self._max_iter_room_coord_opt
+                                   max_coord_iter=self._max_iter_room_coord_opt,
                                    )
         return contour
 
     def _get_wall_center_line(self, contours: List[Contour], boundary: np.ndarray) -> WallCenterLine:
         wcl_new = fit_wall_center_line(WallCenterLine(contours),
-                                       delta_x=10,
-                                       delta_y=10,
+                                       delta_x=self._delta_x,
+                                       delta_y=self._delta_y,
                                        boundary=boundary,
                                        downscale=self._downscale,
                                        max_alt_iter=self._max_iter_wcl_alt_opt,
-                                       max_coord_iter=self._max_iter_wcl_coord_opt,)
+                                       max_coord_iter=self._max_iter_wcl_coord_opt,
+                                       )
         return wcl_new

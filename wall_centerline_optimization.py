@@ -128,7 +128,6 @@ class CoordinateOptimizer:
         center = self._center((self.S @ self.V, self.E @ self.V),
                               self.boundaries,
                               downscale_factor=self._downscale)
-        # center = torch.as_tensor(0, dtype=torch.float64)
         nearby = self._nearby(self.V, self.P, self.L)
         alignment = self._alignment(self.EDGES @ self.V)
 
@@ -168,7 +167,6 @@ def alternating_optimize(wcl: WallCenterLine,
 
     # iterating for at most max_iter
     for i in range(max_alt_iter):
-        reducer._flag = True
         reducer.reduce()
         if reducer.stop:
             break

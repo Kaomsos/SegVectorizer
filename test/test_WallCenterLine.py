@@ -64,15 +64,13 @@ class TestWallCenterOptimization(unittest.TestCase):
         self.assertTrue(isinstance(g.vertices, list))
         self.assertTrue(isinstance(g.vertices[0], int))
         self.assertTrue(isinstance(g._adjacency_list,  dict))
-        self.assertTrue(isinstance(g.matrix, np.ndarray) and g.matrix.shape[0] == g.matrix.shape[1] == n_v)
 
         g.merge_vertices(0, 3)
         self.assertTrue(0 in g.vertices)
         self.assertTrue(3 not in g.vertices)
         self.assertRaises(AssertionError, g._check_edge_exists, (0, 3))
         self.assertRaises(AssertionError, g._check_edge_exists, (3, 0))
-        self.assertTrue(g._check_edge_exists((0, 2)) and g._check_edge_exists((0, 4)))
-        self.assertTrue(g.matrix.shape[0] == g.matrix.shape[1] == n_v - 1)
+        self.assertTrue(g._edge_exists((0, 2)) and g._edge_exists((0, 4)))
 
         g.append_vertex_to_edge(0, (1, 2))
         self.assertRaises(AssertionError, g._check_edge_exists, (1, 2))

@@ -227,11 +227,13 @@ class CoordinateOptimizer:
 
 
 def alternating_optimize(cc: SingleConnectedComponent,
+                         delta_a=10,
+                         delta_b=10,
                          max_alt_iter=5,
                          max_coord_iter=0
                          ) -> Contour:
     plg = Polygon(connected_component=cc, tol=5)
-    reducer = VertexReducer(plg, delta_a=10)
+    reducer = VertexReducer(plg, delta_a=delta_a, delta_b=delta_b)
     opt = CoordinateOptimizer(target=cc, max_iter=max_coord_iter, sigma=10)
     for _ in range(max_alt_iter):
         reducer.reduce()

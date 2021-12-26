@@ -242,9 +242,6 @@ class Rectangle:
         return self.center + np.array([direction, -direction]) * delta
 
 
-
-
-
 #################################################
 class UndirectedGraph:
     # adjacency list representation is implemented
@@ -299,49 +296,83 @@ class UndirectedGraph:
                     edges.append((v, v_))
         return edges
 
-    def merge_vertices(self, i, j):
-        assert i in self._adjacency_list.keys()
-        assert j in self._adjacency_list.keys()
+    def merge_vertices(self, i: Vertex, j: Vertex):
+        self._check_vertex_exists(i)
+        self._check_vertex_exists(j)
         if i == j:
             return
-        # merge i, j into i
-        vertices_to_j = self._adjacency_list.pop(j)
-        self._adjacency_list[i] += vertices_to_j
-        # removing duplicates
-        self._adjacency_list[i] = list(set(self._adjacency_list[i]))
-
+        vertices_to_j = self._adjacency_list[j]
         for k in vertices_to_j:
-            # replace all j with i
-            self._adjacency_list[k] = [v if v != j else i for v in self._adjacency_list[k]]
-            # removing duplicates
-            self._adjacency_list[k] = list(set(self._adjacency_list[k]))
-        # decrease the number of vertices
-        self._n -= 1
+            self.connect_vertices(k, i)
+
+        self.remove_vertex(j)
 
     def append_vertex_to_edge(self, v: Vertex, e: Edge):
-        assert v in self._adjacency_list.keys()
+        self._check_vertex_exists(v)
         self._check_edge_exists(e)
         if v in e:
             return
         # replace (v1, v2) with (v1, v) and (v2, v)
         v1 = e[0]
         v2 = e[1]
-        self._adjacency_list[v1] = [x if x != v2 else v for x in self._adjacency_list[v1]]
-        self._adjacency_list[v2] = [x if x != v1 else v for x in self._adjacency_list[v2]]
 
-        self._adjacency_list[v].append(v1)
-        self._adjacency_list[v].append(v2)
-        # removing duplicates
-        self._adjacency_list[v1] = list(set(self._adjacency_list[v1]))
-        self._adjacency_list[v2] = list(set(self._adjacency_list[v2]))
-        self._adjacency_list[v] = list(set(self._adjacency_list[v]))
+        self.connect_vertices(v, v1)
+        self.connect_vertices(v, v2)
+        self.disconnect_vertices(v1, v2)
+
+    def remove_vertex(self, v: Vertex):
+        self._check_vertex_exists(v)
+
+        connected_vertices = self._adjacency_list.pop(v)
+        for cv in connected_vertices:
+            self._adjacency_list[cv] = [k for k in self._adjacency_list[cv] if k != v]
+
+        self._n -= 1
+
+    def connect_vertices(self, i: Vertex, j: Vertex):
+        """
+        add an edge
+        :param i:
+        :param j:
+        :return:
+        """
+        self._check_vertex_exists(i)
+        self._check_vertex_exists(j)
+        if i == j or self._edge_exists((i, j)):
+            return
+
+        self._adjacency_list[i] += [j]
+        self._adjacency_list[j] += [i]
+
+    def disconnect_vertices(self, i: Vertex, j: Vertex):
+        """
+        remove an edge
+        :param i:
+        :param j:
+        :return:
+        """
+        self._check_vertex_exists(i)
+        self._check_vertex_exists(j)
+        if i == j or not self._edge_exists((i, j)):
+            return
+
+        self._adjacency_list[i] = [k for k in self._adjacency_list[i] if k != j]
+        self._adjacency_list[j] = [k for k in self._adjacency_list[j] if k != i]
+
+    def _vertex_exists(self, v: Vertex) -> bool:
+        return v in self._adjacency_list.keys()
+
+    def _check_vertex_exists(self, v: Vertex):
+        assert self._vertex_exists(v)
+
+    def _edge_exists(self, e: Edge) -> bool:
+        return self._vertex_exists(e[0])\
+               and self._vertex_exists(e[1])\
+               and e[0] in self._adjacency_list[e[1]]\
+               and e[1] in self._adjacency_list[e[0]]
 
     def _check_edge_exists(self, e: Edge):
-        assert e[0] in self._adjacency_list.keys()
-        assert e[1] in self._adjacency_list.keys()
-        assert e[0] in self._adjacency_list[e[1]]
-        assert e[1] in self._adjacency_list[e[0]]
-        return True
+        assert self._edge_exists(e)
 
 
 class WallCenterLine(UndirectedGraph):
