@@ -70,7 +70,9 @@ def distance_p_to_segments_tensor(point: np.ndarray | torch.Tensor,
     return min(ds)
 
 
-def distance_p_to_segments(point: np.ndarray, segments: SegmentCollection) -> np.ndarray:
+def distance_p_to_segments(point: np.ndarray,
+                           segments: SegmentCollection
+                           ) -> np.ndarray:
     """
         brutal-force computation
         :param point:
@@ -104,7 +106,9 @@ def distance_p_to_segments(point: np.ndarray, segments: SegmentCollection) -> np
     return ds
 
 
-def distance_seg_to_segments(seg: Tuple[np.ndarray, np.ndarray], segments: SegmentCollection):
+def distance_seg_to_segments(seg: Tuple[np.ndarray, np.ndarray],
+                             segments: SegmentCollection
+                             ) -> float:
     p1, p2 = seg
     d1 = distance_p_to_segments(p1, segments)
     d2 = distance_p_to_segments(p2, segments)
@@ -112,7 +116,7 @@ def distance_seg_to_segments(seg: Tuple[np.ndarray, np.ndarray], segments: Segme
     return d
 
 
-# TODO: add condition on "overflow"
+
 def project_seg_to_seg(src: Tuple[np.ndarray, np.ndarray],
                        to: Tuple[np.ndarray, np.ndarray]
                        ) -> np.ndarray:
@@ -125,16 +129,36 @@ def project_seg_to_seg(src: Tuple[np.ndarray, np.ndarray],
     p1, p2 = src
     proj = []
     for p in [p1, p2]:
-        A = (to[0] - to[1])[1]
-        B = -(to[0] - to[1])[0]
-        C = to[0][0] * to[1][1] - to[0][1] * to[1][0]
+        foot = project_p_to_seg(p, to)
+        proj.append(foot)
+
+    return np.array(proj)
+
+
+def project_p_to_seg(p: np.ndarray,
+                     seg: np.ndarray
+                     ) -> np.ndarray:
+    uv = seg - p
+    u = uv[0]
+    v = uv[1]
+    u_sub_v = u - v
+
+    norm_u_sub_v_ = (u_sub_v * u_sub_v).sum()
+    proj_u_ = (u * u_sub_v).sum()
+
+    if proj_u_ <= 0:
+        return seg[0]
+    elif proj_u_ >= norm_u_sub_v_:
+        return seg[1]
+    else:
+        A = (seg[0] - seg[1])[1]
+        B = -(seg[0] - seg[1])[0]
+        C = seg[0][0] * seg[1][1] - seg[0][1] * seg[1][0]
 
         x = (B * B * p[0] - A * B * p[1] - A * C) / (A * A + B * B)
         y = (- A * B * p[0] + A * A * p[1] - B * C) / (A * A + B * B)
         foot = np.array([x, y])
-        proj.append(foot)
-
-    return np.array(proj)
+        return foot
 
 
 def intersection_given_x_plg(x, polygon):

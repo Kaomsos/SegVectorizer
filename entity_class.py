@@ -252,6 +252,7 @@ class UndirectedGraph:
                  ) -> None:
 
         self._n = num_vertices
+        self._next_vertex = num_vertices
         ##############################
         # construct a adjacency list
         self._adjacency_list = self._adjacent_list_from_edges(edges)
@@ -319,6 +320,16 @@ class UndirectedGraph:
         self.connect_vertices(v, v1)
         self.connect_vertices(v, v2)
         self.disconnect_vertices(v1, v2)
+
+    def insert_vertex_to_edge(self, e: Edge):
+        v = self.add_vertex()
+        self.append_vertex_to_edge(v, e)
+
+    def add_vertex(self) -> Vertex:
+        old = self._next_vertex
+        self._adjacency_list[old] = []
+        self._next_vertex += 1
+        return old
 
     def remove_vertex(self, v: Vertex):
         self._check_vertex_exists(v)
@@ -527,6 +538,11 @@ class WallCenterLine(UndirectedGraph):
 
     def set_current_coordinates(self, array: np.ndarray):
         self._cur_coordinates = array
+
+
+class WallCenterLineWithOpenPoints(WallCenterLine):
+    def __init__(self, wcl: WallCenterLine):
+        pass
 
 
 class SemiIdentityMapping(UserDict):

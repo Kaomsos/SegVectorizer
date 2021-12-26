@@ -134,7 +134,7 @@ class Vectorizer:
 
     def _set_hyper_parameters_by_rectangles(self, rects: List[Rectangle]) -> None:
         wall_width = np.array([(rect.w, rect.h) for rect in rects]).min(axis=-1).mean()
-        self._delta_a = wall_width * 1.5
+        self._delta_a = wall_width * 2.5
         self._delta_x = wall_width * 2.5
         self._delta_y = wall_width * 2.5
 

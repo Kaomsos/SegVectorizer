@@ -8,7 +8,7 @@ from test.test_WallCenterLine import TestWallCenterOptimization
 
 
 class TestOpenPointExtraction(unittest.TestCase):
-    def _init(self, path='data/flat_1.png'):
+    def _init(self, path='../data/flat_1.png'):
         self.img = Image.open(path)
         self.palette = self.img.getcolors()
 
@@ -158,12 +158,12 @@ class TestOpenPointExtraction(unittest.TestCase):
         plt.imshow(arr + np.nan)
         plot_wall_center_lines(self.wcl)
 
-    def _load_wcl(self, path='data/wcl.pickle'):
+    def _load_wcl(self, path='../data/wcl.pickle'):
         import pickle
         with open(path, 'rb') as f:
             self.wcl = pickle.load(f)
 
-    def _load_door_windows(self, path='data/door_window_ends.pickle'):
+    def _load_door_windows(self, path='../data/door_window_ends.pickle'):
         import pickle
         with open(path, 'rb') as f:
             self.open_ends = pickle.load(f)
