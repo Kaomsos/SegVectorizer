@@ -101,7 +101,9 @@ class Rectangle:
         self.theta = theta
         self.R = None
         self.w_vec = np.array(w_vec)
+        self.w_vec = self.w_vec / np.sqrt((self.w_vec * self.w_vec).sum())
         self.h_vec = np.array(h_vec)
+        self.h_vec = self.h_vec / np.sqrt((self.h_vec * self.h_vec).sum())
 
         self.has_theta: bool = theta is not None
         if self.has_theta:
@@ -128,3 +130,4 @@ class Rectangle:
         delta = max(self.w, self.h) / 2
 
         return self.center + np.array([direction, -direction]) * delta
+
