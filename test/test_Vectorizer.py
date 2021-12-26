@@ -79,18 +79,19 @@ class TestVectorizer(unittest.TestCase):
 
     def test_vectorize(self):
         import pickle
-        from utils import plot_wcl_against_target
+        from utils import plot_wcl_against_target, plot_position_of_rects
         self._init(path='../data/flat_1.png')
 
         segmentation = np.array(self.img)
 
         opens, boundary, rooms = self.vectorizer._extract_connected_components(segmentation)
+        rects = [self.vectorizer._get_rectangle(o) for o in opens]
 
         with open("../data/wcl-1.pickle", 'rb') as f:
             self.wcl = pickle.load(f)
-        plot_wcl_against_target(self.wcl, boundary)
-
-
+        plot_wcl_against_target(self.wcl, boundary, show=False)
+        plot_position_of_rects(rects, color='red', show=False)
+        plt.show()
 
     def plot_contours_against_image(self, contours: List[Polygon]):
         from utils import plot_polygon

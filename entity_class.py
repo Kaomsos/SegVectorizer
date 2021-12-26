@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Tuple, List, Optional, TYPE_CHECKING
 if TYPE_CHECKING:
-    from typing_ import EdgeCollection, AdjacentList, Vertex, Edge
+    from typing_ import EdgeCollection, AdjacentList, Vertex, Edge, Coordinate2D, Radius, Length, Vector2D
 
 from collections import UserDict
 import numpy as np
@@ -136,7 +136,7 @@ class Polygon:
         """
         self._tol = tol if tol is not None else 30
         # extract polygon's vertices
-        # from connected pixels component
+        # from connected pixels target
         vertices_ = None
         if connected_component is not None:
             assert isinstance(connected_component, SingleConnectedComponent)
@@ -144,8 +144,8 @@ class Polygon:
 
         elif arr is not None:
             contours = find_contours(arr)    # delete the last point
-            assert len(contours) <= 1, 'more than one connected component are detected'
-            assert len(contours) > 0, 'no connected component is detected'
+            assert len(contours) <= 1, 'more than one connected target are detected'
+            assert len(contours) > 0, 'no connected target is detected'
             vertices_ = approximate_polygon(contours[0], tolerance=self._tol)
             vertices_ = vertices_[..., [1, 0]]
         # directly assign vertices
@@ -193,6 +193,56 @@ class Polygon:
     @property
     def numpy_array(self):
         return self._vertices[:-1]
+
+
+class Rectangle:
+    """
+     a vector representation of any rectangle on a 2D plane
+    """
+    def __init__(self,
+                 center: Coordinate2D,
+                 w: Length,
+                 h: Length,
+                 theta: Radius = None,
+                 w_vec: Vector2D = None,
+                 h_vec: Vector2D = None,
+                 ) -> None:
+        self.center = np.array(center)
+        self.w = w
+        self.h = h
+        self.theta = theta
+        self.R = None
+        self.w_vec = np.array(w_vec)
+        self.h_vec = np.array(h_vec)
+
+        self.has_theta: bool = theta is not None
+        if self.has_theta:
+            self.R: np.ndarray = np.array([[np.cos(theta), -np.sin(theta)],
+                                           [np.sin(theta), np.cos(theta)]])
+
+        self.has_vec: bool = (w_vec is not None) and (h_vec is not None)
+
+        assert self.has_theta or self.has_vec
+
+    @property
+    def ends(self) -> Tuple[Coordinate2D, Coordinate2D]:
+        assert self.has_theta or self.has_vec
+
+        if self.has_vec:
+            direction = self.w_vec if self.w > self.h else self.h_vec
+
+        elif self.has_theta:
+            direction = np.array([1, 0]) if self.w > self.h else np.array([0, 1])
+            direction = self.R @ direction
+        else:
+            raise ValueError("no enough parameters to define a recrangle")
+
+        delta = max(self.w, self.h) / 2
+
+        return self.center + np.array([direction, -direction]) * delta
+
+
+
 
 
 #################################################

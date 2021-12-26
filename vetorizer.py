@@ -1,14 +1,14 @@
 from __future__ import annotations
-from typing import Tuple, List, Dict, Set
+from typing import Tuple, List, Dict, Set, TYPE_CHECKING
+if TYPE_CHECKING:
+    from typing_ import WallCenterLine, Rectangle, Palette, Color, SingleConnectedComponent, Contour
 
 import numpy as np
-
-from typing_ import Palette, Color, SingleConnectedComponent, Contour
-from entity_class import WallCenterLine
 
 from geometry import find_connected_components
 from room_contour_optimization import alternating_optimize as fit_room_contour
 from wall_centerline_optimization import alternating_optimize as fit_wall_center_line
+from open_points import fit_open_points
 
 
 class PaletteConfiguration:
@@ -88,10 +88,10 @@ class Vectorizer:
     def _vectorize(self, segmentation):
         open_cc, boundary_cc, room_cc = self._extract_connected_components(segmentation)
 
-        room_contours: List[Contour] = [self._get_room_contour(cc) for cc in room_cc]
+        rects: List[Rectangle] = [self._get_rectangle(o) for o in open_cc]
 
+        room_contours: List[Contour] = [self._get_room_contour(cc) for cc in room_cc]
         wcl = self._get_wall_center_line(room_contours, boundary_cc)
-        pass
 
     def _extract_connected_components(self, segmentation):
         open_cc: List[SingleConnectedComponent] = []
@@ -112,6 +112,11 @@ class Vectorizer:
             room_cc += find_connected_components(segmentation, c, threshold=self._room_threshold)
 
         return open_cc, boundary_cc, room_cc
+
+    @staticmethod
+    def _get_rectangle(open_: SingleConnectedComponent) -> Rectangle:
+        rect = fit_open_points(open_)
+        return rect
 
     def _get_room_contour(self, cc: SingleConnectedComponent) -> Contour:
         contour = fit_room_contour(cc,

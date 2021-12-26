@@ -39,7 +39,7 @@ class TestOpenPointExtraction(unittest.TestCase):
     def test_rect_fit(self):
         from geometry import find_connected_components
         from utils import palette
-        from room_contour_optimization import RectangleOptimizer
+        from open_points import SoftRasFitter
 
         # get all door/window components
         self._init(path='data/flat_0.png')
@@ -47,14 +47,14 @@ class TestOpenPointExtraction(unittest.TestCase):
         color = palette["door&window"]
         self.dws = find_connected_components(self.img, color, threshold=5)
 
-        rect_fitter = RectangleOptimizer(sigma=0.1,
-                                         max_iter=10,
-                                         lr=0.01,
-                                         log_iou_target=-0.5)
+        rect_fitter = SoftRasFitter(sigma=0.1,
+                                    max_iter=10,
+                                    lr=0.01,
+                                    log_iou_target=-0.5)
 
         l = []
         for dw in self.dws[:]:
-            rect = rect_fitter.fit_return(dw, verbose=True)
+            rect = rect_fitter.fit(dw)
             l.append(rect)
             print(rect)
 
@@ -223,7 +223,7 @@ class TestPCA(unittest.TestCase):
             self.all_cc |= dw.array
 
             # plot this current connected components
-            # plot_binary_image(dw.array, title=f"component {i + 1}")
+            # plot_binary_image(dw.array, title=f"target {i + 1}")
 
             # assert bbox attribute
             self.assertTrue(isinstance(dw.bbox, tuple) and len(dw.bbox) == 2)

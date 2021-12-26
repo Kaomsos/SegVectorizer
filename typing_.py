@@ -27,6 +27,12 @@ Palette = Dict[str, Color]
 import entity_class
 SingleConnectedComponent = entity_class.SingleConnectedComponent
 Polygon = entity_class.Polygon
+Rectangle = entity_class.Rectangle
 Contour = Polygon
 WallCenterLine = entity_class.WallCenterLine
 
+
+Coordinate2D = Tuple[float, float]
+Radius = float
+Length = float
+Vector2D = Tuple[float, float]

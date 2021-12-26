@@ -1,12 +1,12 @@
 from __future__ import annotations
 import numpy as np
 import torch
-from matplotlib import pyplot as plt
+from matplotlib import pyplot as plt, pyplot
 from torchviz import make_dot
 from entity_class import BinaryImage, Polygon, WallCenterLine
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 if TYPE_CHECKING:
-    from typing_ import WallCenterLine, Polygon
+    from typing_ import WallCenterLine, Polygon, Rectangle
 import warnings
 
 __all__ = ["plot_binary_image",
@@ -16,7 +16,8 @@ __all__ = ["plot_binary_image",
            'plot_polygon',
            'plot_wall_center_lines',
            'plot_wcl_against_target',
-           'viz_computation_graph',]
+           'viz_computation_graph',
+           'plot_position_of_rects',]
 
 
 def plot_binary_image(bin_arr, title="", show=True):
@@ -80,10 +81,11 @@ def plot_wall_center_lines(wcl: WallCenterLine, annotation=True, title: str = ""
         plt.show()
 
 
-def plot_wcl_against_target(wcl, target, title=''):
+def plot_wcl_against_target(wcl, target, title='', show=True):
     plt.imshow(1 - target, cmap='gray')
     plot_wall_center_lines(wcl, title=title, show=False)
-    plt.show()
+    if show:
+        plt.show()
 
 
 def viz_computation_graph(var: torch.Tensor,
@@ -99,6 +101,16 @@ def viz_computation_graph(var: torch.Tensor,
     else:
         pass
 
+
+def plot_position_of_rects(l: List[Rectangle], color="#3399ff", show=False):
+    for i, rect in enumerate(l):
+        center = rect.center
+        ends = rect.ends
+        plt.plot(ends[..., 0], ends[..., 1], color=color)
+        plt.text(center[0] + 5, center[1] - 5, f"{i}", size='x-small')
+
+    if show:
+        plt.show()
 
 palette = {
      'background': (255, 255, 255),
