@@ -3,6 +3,7 @@ from typing import Tuple, List, Optional, TYPE_CHECKING
 if TYPE_CHECKING:
     from typing_ import EdgeCollection, AdjacentList, Vertex, Edge
 
+from collections import UserDict
 import numpy as np
 import torch
 from skimage.measure import find_contours, approximate_polygon
@@ -334,8 +335,8 @@ class WallCenterLine(UndirectedGraph):
         # and are somehow constant
         self._p2j = dict(zip(self._adjacency_list.keys(), range(self._n)))
         self._j2p = dict(zip(range(self._n), self._adjacency_list.keys()))
-        # p2v is naturally initialized
-        self._p2v = dict(zip(self._adjacency_list.keys(), self._adjacency_list.keys()))
+        # p2v is naturally initialized as SemiIdentityMapping
+        self._p2v = SemiIdentityMapping()
         # v2i and i2v are are determined by the init codes above
         # and are variable
         self._v2i = dict(zip(self._adjacency_list.keys(), range(self._n)))
@@ -447,5 +448,21 @@ class WallCenterLine(UndirectedGraph):
         self._cur_coordinates = array
 
 
+class SemiIdentityMapping(UserDict):
+    """
+     a dict that should not be iterated
+     which defines rules of a mapping
+    """
+    def __getitem__(self, item):
+        key = item
 
+        while key in self.data.keys():
+            # to avoid infinite loop
+            if key == self.data[key]:
+                break
+            key = self.data[key]
 
+        return key
+
+    def __call__(self, x):
+        return self.__getitem__(x)

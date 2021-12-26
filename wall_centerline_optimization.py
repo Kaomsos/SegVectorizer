@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import torch
 from torch.optim import RMSprop
 
-from entity_class import WallCenterLine, SingleConnectedComponent
+from entity_class import WallCenterLine, SingleConnectedComponent, SemiIdentityMapping
 from sklearn.neighbors import kneighbors_graph
 from geometry import distance_p_to_segments
 from objective import center, nearby, alignment
@@ -33,10 +33,10 @@ class VertexReducer:
         g = (g > 0).toarray() & (g < delta_x).toarray()
         edges = np.argwhere(np.triu(g | g.T)).tolist()
         i2v = self._wcl.i2v
-        after_merge = {}
+        after_merge = SemiIdentityMapping()
         for i, j in edges:
-            i_after = after_merge.get(i, i)
-            j_after = after_merge.get(j, j)
+            i_after = after_merge(i)
+            j_after = after_merge(j)
             self._wcl.merge_vertices(i2v[i_after], i2v[j_after])
             after_merge[j_after] = i_after
             self._flag = False

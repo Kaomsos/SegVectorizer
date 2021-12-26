@@ -1,11 +1,12 @@
 # %%
 from __future__ import annotations
 from typing import Tuple
+from typing_ import SingleConnectedComponent, Contour
 
 import numpy as np
 import torch
 
-from entity_class import Polygon, SingleConnectedComponent
+from entity_class import Polygon
 from rasterizer import Base2DPolygonRasterizer as SoftRasterizer
 from rasterizer import FixedCenterRectangle2DRasterizer as RectangleRasterizer
 from objective import log_iou, boundary, orthogonal
@@ -173,6 +174,12 @@ class CoordinateOptimizer:
                                           mode='soft euclidean')
 
     def fit(self, plg: Polygon, verbose=False):
+        """
+        fit the polygon and return
+        :param plg:
+        :param verbose:
+        :return:
+        """
         self._P = plg.torch_tensor
         self._optimizer = RMSprop([self._P], lr=self._lr)
         self._verbose = verbose
@@ -182,6 +189,7 @@ class CoordinateOptimizer:
             L.backward()
             self._optimizer.step()
             self._hook_after_step()
+        # update the polygon
         plg.set_vertices(self.optimized_result)
 
     def _rasterize(self, polygon: torch.Tensor):
@@ -314,13 +322,13 @@ class RectangleOptimizer:
 
 
 def alternating_optimize(cc: SingleConnectedComponent,
-                         max_iter=5,
-                         coord_opt_iter=0
-                         ) -> Polygon:
+                         max_alt_iter=5,
+                         max_coord_iter=0
+                         ) -> Contour:
     plg = Polygon(connected_component=cc, tol=5)
     reducer = VertexReducer(plg, delta_a=10)
-    opt = CoordinateOptimizer(target=cc, max_iter=0, sigma=10)
-    for _ in range(max_iter):
+    opt = CoordinateOptimizer(target=cc, max_iter=max_coord_iter, sigma=10)
+    for _ in range(max_alt_iter):
         reducer.reduce()
         if reducer.stop:
             break
