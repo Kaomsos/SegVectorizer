@@ -96,7 +96,6 @@ from PIL import Image
 import numpy as np
 from skimage.io import imread
 from skimage.measure import find_contours
-from haishoku.haishoku import Haishoku
 import matplotlib.pyplot as plt
 
 from geometry import find_connected_components
