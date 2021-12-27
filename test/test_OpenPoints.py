@@ -39,7 +39,7 @@ class TestOpenPointExtraction(unittest.TestCase):
     def test_rect_fit(self):
         from geometry import find_connected_components
         from utils import palette
-        from open_points_extraction import SoftRasFitter
+        from main_steps.open_points import SoftRasFitter
 
         # get all door/window components
         self._init(path='data/flat_0.png')
@@ -289,7 +289,7 @@ class TestOpenPointExtraction(unittest.TestCase):
         self.vectorizer = Vectorizer(palette=palette, palette_config=p_config)
 
     def test_open_points_extraction(self):
-        from open_points_extraction import insert_open_points_in_wcl
+        from main_steps.open_points import insert_open_points_in_wcl
         from utils import plot_wcl_o_against_target
         import pickle
 

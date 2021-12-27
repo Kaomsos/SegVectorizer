@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Tuple, List, Dict, Set, TYPE_CHECKING
+from typing import List, Dict, Set, TYPE_CHECKING
 if TYPE_CHECKING:
     from typing_ import WallCenterLine, Rectangle, Palette, Color, SingleConnectedComponent, Contour
 
@@ -8,9 +8,9 @@ import numpy as np
 
 from entity.graph import WallCenterLine
 from geometry import find_connected_components
-from room_contour_optimization import alternating_optimize as fit_room_contour
-from wall_centerline_optimization import alternating_optimize as fit_wall_center_line
-from open_points_extraction import fit_open_points, insert_open_points_in_wcl
+from main_steps.room_contour import alternating_optimize as fit_room_contour
+from main_steps.wall_center_line import alternating_optimize as fit_wall_center_line
+from main_steps.open_points import fit_open_points, insert_open_points_in_wcl
 
 
 class PaletteConfiguration(UserDict):

@@ -1,9 +1,11 @@
 from __future__ import annotations
 from typing import Tuple
-import torch
+
 import numpy as np
+import torch
 from skimage.measure import find_contours
 from skimage.transform import downscale_local_mean
+
 from geometry import distance_p_to_plg, get_segments, distance_p_to_segments_tensor
 
 EPSILON = 1e-5

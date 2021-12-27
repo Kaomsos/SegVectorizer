@@ -1,21 +1,22 @@
 from __future__ import annotations
-from abc import abstractmethod, ABC
 from typing import TYPE_CHECKING, List
 if TYPE_CHECKING:
     from typing_ import SingleConnectedComponent, WallCenterLine
 
-import torch
-from torch.optim import RMSprop
-from sklearn.decomposition import PCA
-import numpy as np
 import importlib
+from abc import ABC, abstractmethod
 
-from objective import log_iou
-from rasterizer import FixedCenterRectangle2DRasterizer as RectangleRasterizer
+import numpy as np
+import torch
+from sklearn.decomposition import PCA
+from torch.optim import RMSprop
 
+import softras.objective
 from entity.graph import WallCenterLineWithOpenPoints as WCL_O
 from entity.polygon import Rectangle
-from geometry import project_seg_to_seg, distance_seg_to_segments
+from geometry import distance_seg_to_segments, project_seg_to_seg
+from softras.objective import log_iou
+from softras.rasterizer import FixedCenterRectangle2DRasterizer as RectangleRasterizer
 
 
 ###########################################
@@ -133,7 +134,7 @@ class SoftRasFitter(RectangleFitter):
 
     @property
     def result(self):
-        return self._cc.center,\
+        return softras.objective.center, \
                (float(self.w), float(self.h), float(self.theta))
 
 

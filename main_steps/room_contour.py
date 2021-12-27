@@ -1,15 +1,17 @@
-# %%
 from __future__ import annotations
-from typing_ import SingleConnectedComponent, Contour
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from typing_ import SingleConnectedComponent, Contour
+
+import importlib
 
 import numpy as np
 import torch
+from torch.optim import RMSprop
 
 from entity.polygon import Polygon
-from rasterizer import Base2DPolygonRasterizer as SoftRasterizer
-from objective import log_iou, boundary, orthogonal
-from torch.optim import RMSprop
-import importlib
+from softras.objective import log_iou, boundary, orthogonal
+from softras.rasterizer import Base2DPolygonRasterizer as SoftRasterizer
 
 
 class PolygonVertexIterator:
@@ -241,10 +243,3 @@ def alternating_optimize(cc: SingleConnectedComponent,
             break
         opt.fit(plg, verbose=True)
     return plg
-
-
-if __name__ == "__main__":
-    pass
-
-
-

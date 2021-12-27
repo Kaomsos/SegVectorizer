@@ -1,17 +1,17 @@
 from __future__ import annotations
-from typing import Dict
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from typing_ import WallCenterLine, SingleConnectedComponent
 
-import matplotlib.pyplot as plt
+import numpy as np
 import torch
+from matplotlib import pyplot as plt
+from sklearn.neighbors import kneighbors_graph
 from torch.optim import RMSprop
 
 from entity.mapping import SemiIdentityMapping
-from entity.graph import WallCenterLine
-from entity.image import SingleConnectedComponent
-from sklearn.neighbors import kneighbors_graph
 from geometry import distance_p_to_segments
-from objective import center, nearby, alignment
-import numpy as np
+from softras.objective import center, nearby, alignment
 
 
 class VertexReducer:

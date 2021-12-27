@@ -1,7 +1,7 @@
 # %%
 import torch
 from torchviz import make_dot
-from rasterizer import Base2DPolygonRasterizer, BoundingBox2DRasterizer, FixedCenterRectangle2DRasterizer
+from softras.rasterizer import Base2DPolygonRasterizer, BoundingBox2DRasterizer, FixedCenterRectangle2DRasterizer
 from image_reader import BinaryImageFromFile
 
 if __name__ == "__main__":

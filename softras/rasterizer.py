@@ -1,16 +1,12 @@
 from __future__ import annotations
-from typing import Tuple, TypeVar, Generic, Optional
 from abc import ABC, abstractmethod
-from numpy.typing import ArrayLike
-from torchtyping import TensorType
-from torch import Tensor
+from typing import Tuple
 
 import torch
-from torch import nn
-import numpy as np
+from numpy.typing import ArrayLike
+from torch import nn, Tensor
 
-from geometry import (distance_p_to_plg, get_segments,
-                      intersection_given_x_plg, get_bounding_box)
+from geometry import intersection_given_x_plg, distance_p_to_plg, get_segments, get_bounding_box
 
 
 class Rasterizer(ABC):
@@ -196,19 +192,3 @@ class FixedCenterRectangle2DRasterizer(Base2DPolygonRasterizer):
                         ])
         polygon = R @ (rect - self._center) + self._center
         return super(FixedCenterRectangle2DRasterizer, self).rasterize(polygon)
-
-
-if __name__ == "__main__":
-    polygon = [
-               [50, 10],
-               [70, 30],
-               [20, 80]
-               ]
-    rasterizer = Base2DPolygonRasterizer(image_size=(100, 100), mode="soft euclidean", sigma=1)
-    m_ = rasterizer.rasterize(polygon)
-    import matplotlib.pyplot as plt
-    plt.imshow(m_)
-    plt.show()
-
-
-

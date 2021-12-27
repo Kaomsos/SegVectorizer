@@ -24,7 +24,7 @@ class TestRoomContourOptimization(unittest.TestCase):
     def test_vertices_reduction(self):
         from image_reader import BinaryImageFromFile
         from entity.polygon import Polygon
-        from room_contour_optimization import VertexReducer
+        from main_steps.room_contour import VertexReducer
         from utils import plot_polygon_comparing_cc
 
         path = "data/rect2.jpg"
@@ -41,8 +41,10 @@ class TestRoomContourOptimization(unittest.TestCase):
         from image_reader import BinaryImageFromFile
         import torch
         from torch.optim import RMSprop
-        from objective import log_iou, boundary, orthogonal
-        from rasterizer import Base2DPolygonRasterizer
+        from softras.objective import orthogonal
+        from softras.objective import boundary
+        from softras.objective import log_iou
+        from softras.rasterizer import Base2DPolygonRasterizer
 
         path = "data/rect1.jpg"
         self.sigma = 10
@@ -98,8 +100,8 @@ class TestRoomContourOptimization(unittest.TestCase):
     def alternating_optimizing(cc):
         from utils import plot_polygon_comparing_cc, plot_contours
         from entity.polygon import Polygon
-        from room_contour_optimization import VertexReducer
-        from room_contour_optimization import CoordinateOptimizer
+        from main_steps.room_contour import VertexReducer
+        from main_steps.room_contour import CoordinateOptimizer
 
         plot_contours(cc)
         plg = Polygon(connected_component=cc, tol=2)

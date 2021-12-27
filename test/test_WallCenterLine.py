@@ -4,6 +4,8 @@ import numpy as np
 from PIL import Image
 from matplotlib import pyplot as plt
 
+import main_steps.wall_center_line
+
 
 class TestWallCenterOptimization(unittest.TestCase):
     def test_init_(self):
@@ -91,14 +93,14 @@ class TestWallCenterOptimization(unittest.TestCase):
     def test_junction_reduction(self):
         # step1: reduce by condition x
         # step2: reduce by condition y
-        import wall_centerline_optimization as wclo
+        import main_steps.wall_center_line as wclo
         from utils import plot_wall_center_lines, plot_wcl_against_target
 
         self.test_init_()
 
         plot_wcl_against_target(self.wcl, self.boundary, title='before processing')
 
-        reducer = wclo.VertexReducer(self.wcl)
+        reducer = main_steps.wall_center_line.VertexReducer(self.wcl)
 
         reducer.reduce_by_condition_x(10)
         plot_wall_center_lines(self.wcl, title=f"reduce_iter=1, after condition x")
@@ -107,18 +109,19 @@ class TestWallCenterOptimization(unittest.TestCase):
         plot_wall_center_lines(self.wcl, title=f"reduce_iter=1, after condition y")
 
     def test_coordinate_optimization(self):
-        import wall_centerline_optimization as wclo
+        import main_steps.wall_center_line as wclo
         from utils import plot_wcl_against_target
 
         self.test_junction_reduction()
         plot_wcl_against_target(self.wcl, self.boundary, title='after reduction')
 
-        self.optimizer = wclo.CoordinateOptimizer(self.wcl, max_iter=10, lr=0.1)
+        self.optimizer = main_steps.wall_center_line.CoordinateOptimizer(self.wcl, max_iter=10, lr=0.1)
         self.optimizer.fit(self.boundary, verbose=True)
         plot_wcl_against_target(self.wcl, self.boundary, title='after optimization')
 
     def test_alternating_optimization(self):
-        from wall_centerline_optimization import VertexReducer, CoordinateOptimizer
+        from main_steps.wall_center_line import CoordinateOptimizer
+        from main_steps.wall_center_line import VertexReducer
         from utils import plot_wcl_against_target
 
         self.test_init_()
