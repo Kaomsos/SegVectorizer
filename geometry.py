@@ -180,10 +180,12 @@ def get_bounding_box(points: Tensor) -> Tuple[Tensor, Tensor]:
 
 def find_connected_components(img,
                               color: Tuple[int, int, int],
-                              threshold: float = 5
+                              threshold: float = 5,
+                              tag=None,
                               ) -> List[SingleConnectedComponent]:
     """
     find connected components given color
+    :param tag:
     :param img:
     :param color:
     :param threshold:
@@ -204,7 +206,7 @@ def find_connected_components(img,
     for i in range(num):
         i += 1
         bin_array = np.where(labels == i, 1, 0)
-        inst = SingleConnectedComponent(bin_array, threshold=threshold)
+        inst = SingleConnectedComponent(bin_array, tag=tag, threshold=threshold)
         if inst is not None:
             connected_components.append(inst)
 

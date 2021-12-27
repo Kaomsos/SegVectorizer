@@ -341,7 +341,7 @@ class WallCenterLineWithOpenPoints(WallCenterLine):
         self._update_v2i_i2v()
         return v
 
-    def insert_open_to_edge(self, seg: Segment, e: Edge, type_=None):
+    def insert_open_to_edge(self, seg: Segment, e: Edge) -> Edge:
         self._check_edge_exists(e)
         e1 = self.get_coordinate_by_v(e[0])
         e2 = self.get_coordinate_by_v(e[1])
@@ -364,13 +364,19 @@ class WallCenterLineWithOpenPoints(WallCenterLine):
 
         self.connect_vertices(e[0], to_e1)
         self.connect_vertices(e[1], to_e2)
-
-        # add property to these edges
         self._add_to_opens((v1, v2))
-        if type_ is not None and type_ == 'door':
-            self._add_to_doors((v1, v2))
-        elif type_ is not None and type_ == 'windows':
-            self._add_to_windows((v1, v2))
+
+        return v1, v2
+
+    def insert_window_to_edge(self, seg: Segment, e: Edge) -> Edge:
+        v1, v2 = self.insert_open_to_edge(seg, e)
+        self._add_to_windows((v1, v2))
+        return v1, v2
+
+    def insert_door_to_edge(self, seg: Segment, e: Edge) -> Edge:
+        v1, v2 = self.insert_open_to_edge(seg, e)
+        self._add_to_doors((v1, v2))
+        return v1, v2
 
     def _add_to_opens(self, e: Edge):
         self._check_edge_exists(e)

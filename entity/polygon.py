@@ -94,6 +94,7 @@ class Rectangle:
                  theta: Radius = None,
                  w_vec: Vector2D = None,
                  h_vec: Vector2D = None,
+                 tag=None,
                  ) -> None:
         self.center = np.array(center)
         self.w = w
@@ -113,6 +114,8 @@ class Rectangle:
         self.has_vec: bool = (w_vec is not None) and (h_vec is not None)
 
         assert self.has_theta or self.has_vec
+
+        self.tag = tag
 
     @property
     def ends(self) -> Tuple[Coordinate2D, Coordinate2D] | np.ndarray:

@@ -47,7 +47,8 @@ class BinaryImage:
 class SingleConnectedComponent(BinaryImage):
     def __new__(cls,
                 bin_array: np.ndarray,
-                threshold: float = 10
+                threshold: float = 10,
+                tag=None,
                 ) -> Optional[SingleConnectedComponent]:
         inst = super().__new__(cls)
         super(SingleConnectedComponent, inst).__init__(bin_array)
@@ -75,8 +76,9 @@ class SingleConnectedComponent(BinaryImage):
             # return None
             return
 
-    def __init__(self, bin_array, threshold=10):
-        pass
+    def __init__(self, bin_array, tag=None, threshold=10):
+        self.tag = tag
+
 
     def _init_contours(self, filter_factor=0.9):
         # core function

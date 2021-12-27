@@ -80,8 +80,25 @@ class TestVectorizer(unittest.TestCase):
 
     def test_vectorize(self):
         from utils import plot_wcl_against_target, plot_position_of_rects, plot_wcl_o_against_target
-        self._init(path='../data/Figure_47541863.png')
+        from vetorizer import Vectorizer, PaletteConfiguration
+        from utils import palette
 
+        path = '../data/Figure_47541863.png'
+        self.img = Image.open(path)
+        self.segmentation = np.array(self.img)
+
+        p_config = PaletteConfiguration(palette)
+        p_config.add_open("door&window")
+        for item in ['bathroom/washroom',
+                     'livingroom/kitchen/dining add_room',
+                     'bedroom',
+                     'hall',
+                     'balcony',
+                     'closet']:
+            p_config.add_room(item)
+        p_config.add_boundary("wall")
+
+        self.vectorizer = Vectorizer(palette_config=p_config)
         wcl_o = self.vectorizer._vectorize(self.segmentation)
         plot_wcl_o_against_target(wcl_o, self.vectorizer.boundary)
 

@@ -162,5 +162,12 @@ def insert_open_points_in_wcl(opens: List[Rectangle], wcl: WallCenterLine) -> WC
         e = wcl_o.i2e[which]
 
         proj = project_seg_to_seg(seg, to)
-        wcl_o.insert_open_to_edge(proj, e)
+
+        if rect.tag == "window":
+            wcl_o.insert_window_to_edge(proj, e)
+        elif rect.tag == "door":
+            wcl_o.insert_door_to_edge(proj, e)
+        else:
+            wcl_o.insert_open_to_edge(proj, e)
+
     return wcl_o

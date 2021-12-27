@@ -162,10 +162,22 @@ class Vectorizer:
         return wcl_o
 
     def _extract_connected_components(self, segmentation):
-        open_cc: List[SingleConnectedComponent] = []
-        for c in self._open_colors:
+        window_cc: List[SingleConnectedComponent] = []
+        for c in self._window_colors:
+            window_cc += find_connected_components(segmentation, c, threshold=self._boundary_threshold, tag="window")
+
+        door_cc: List[SingleConnectedComponent] = []
+        for c in self._door_colors:
+            door_cc += find_connected_components(segmentation, c, threshold=self._boundary_threshold, tag="door")
+
+        ########################################################
+        # only open_cc will be returned
+        open_cc: List[SingleConnectedComponent] = window_cc + door_cc
+        for c in self._open_colors - (self._window_colors | self._door_colors):
             open_cc += find_connected_components(segmentation, c, threshold=self._open_threshold)
 
+        ###########################################################
+        # boundary is the union of open cc and wall cc
         # make a copy of open_cc by slicing
         boundary_cc_list: List[SingleConnectedComponent] = open_cc[:]
         for c in self._boundary_colors - self._open_colors:
@@ -184,6 +196,7 @@ class Vectorizer:
     @staticmethod
     def _get_rectangle(open_: SingleConnectedComponent) -> Rectangle:
         rect = fit_open_points(open_)
+        rect.tag = open_.tag
         return rect
 
     def _set_hyper_parameters_by_rectangles(self, rects: List[Rectangle]) -> None:
