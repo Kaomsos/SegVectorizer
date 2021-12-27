@@ -4,7 +4,7 @@ from typing import List, TYPE_CHECKING
 import matplotlib.pyplot as plt
 
 if TYPE_CHECKING:
-    from typing_ import SingleConnectedComponent, Polygon
+    from SegVec.typing_ import SingleConnectedComponent, Polygon
 import unittest
 from PIL import Image
 import numpy as np
@@ -12,8 +12,8 @@ import numpy as np
 
 class TestVectorizer(unittest.TestCase):
     def _init(self, path='../data/flat_1.png'):
-        from vetorizer import Vectorizer, PaletteConfiguration
-        from utils import palette
+        from SegVec.vetorizer import Vectorizer, PaletteConfiguration
+        from SegVec.utils import palette
 
         self.img = Image.open(path)
         self.segmentation = np.array(self.img)
@@ -42,7 +42,7 @@ class TestVectorizer(unittest.TestCase):
         self.vectorizer = Vectorizer(palette_config=p_config)
 
     def test_vectorizer_get_components(self):
-        from entity.image import SingleConnectedComponent
+        from SegVec.entity.image import SingleConnectedComponent
 
         self._init(path='../data/flat_1.png')
 
@@ -56,7 +56,7 @@ class TestVectorizer(unittest.TestCase):
                 self.assertTrue(isinstance(cc, SingleConnectedComponent))
 
     def test_vectorize_get_wall_center_lines(self):
-        from typing_ import Contour, WallCenterLine
+        from SegVec.typing_ import Contour, WallCenterLine
 
         self._init(path='../data/flat_0.png')
 
@@ -79,9 +79,9 @@ class TestVectorizer(unittest.TestCase):
         pass
 
     def test_vectorize(self):
-        from utils import plot_wcl_against_target, plot_position_of_rects, plot_wcl_o_against_target
-        from vetorizer import Vectorizer, PaletteConfiguration
-        from utils import palette
+        from SegVec.utils import plot_wcl_against_target, plot_position_of_rects, plot_wcl_o_against_target
+        from SegVec.vetorizer import Vectorizer, PaletteConfiguration
+        from SegVec.utils import palette
 
         path = '../data/Figure_47541863.png'
         self.img = Image.open(path)
@@ -103,7 +103,7 @@ class TestVectorizer(unittest.TestCase):
         plot_wcl_o_against_target(wcl_o, self.vectorizer.boundary)
 
     def plot_contours_against_image(self, contours: List[Polygon]):
-        from utils import plot_polygon
+        from SegVec.utils import plot_polygon
 
         plt.imshow(np.array(self.img) + np.nan)
         for c in contours:
@@ -112,7 +112,7 @@ class TestVectorizer(unittest.TestCase):
         plt.show()
 
     def plot_cc_against_image(self, ccs: List[SingleConnectedComponent]):
-        from utils import plot_binary_image
+        from SegVec.utils import plot_binary_image
 
         bin_arr = np.zeros(self.img.size[::-1], dtype=int)
 

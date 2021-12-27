@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from typing_ import WallCenterLine, SingleConnectedComponent
+    from ..typing_ import WallCenterLine, SingleConnectedComponent
 
 import numpy as np
 import torch
@@ -9,9 +9,9 @@ from matplotlib import pyplot as plt
 from sklearn.neighbors import kneighbors_graph
 from torch.optim import RMSprop
 
-from entity.mapping import SemiIdentityMapping
-from geometry import distance_p_to_segments
-from softras.objective import center, nearby, alignment
+from ..entity.mapping import SemiIdentityMapping
+from ..geometry import distance_p_to_segments
+from ..softras.objective import center, nearby, alignment
 
 
 class VertexReducer:

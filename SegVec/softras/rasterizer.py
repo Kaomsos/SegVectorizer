@@ -6,7 +6,7 @@ import torch
 from numpy.typing import ArrayLike
 from torch import nn, Tensor
 
-from geometry import intersection_given_x_plg, distance_p_to_plg, get_segments, get_bounding_box
+from ..geometry import intersection_given_x_plg, distance_p_to_plg, get_segments, get_bounding_box
 
 
 class Rasterizer(ABC):

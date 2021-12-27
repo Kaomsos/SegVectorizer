@@ -47,4 +47,3 @@ class TestFindConnectedComponents(unittest.TestCase):
             img |= cc.array
 
         plot_binary_image(img)
-

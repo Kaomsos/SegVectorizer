@@ -79,7 +79,6 @@ class SingleConnectedComponent(BinaryImage):
     def __init__(self, bin_array, tag=None, threshold=10):
         self.tag = tag
 
-
     def _init_contours(self, filter_factor=0.9):
         # core function
         contours = find_contours(self.array, fully_connected='high')    # coord = array
@@ -99,7 +98,7 @@ class SingleConnectedComponent(BinaryImage):
     @staticmethod
     def filter_contours(contours: List[np.array], threshold: float = 10):
         # solving the problem of circular import
-        mod = importlib.import_module("geometry")
+        mod = importlib.import_module("SegVec.geometry")
         get_bounding_box = getattr(mod, 'get_bounding_box')
 
         # define an inner function

@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Tuple, TYPE_CHECKING
 if TYPE_CHECKING:
-    from typing_ import Coordinate2D, Length, Radius, Vector2D
+    from ..typing_ import Coordinate2D, Length, Radius, Vector2D
 
 import numpy as np
 import torch

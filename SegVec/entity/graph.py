@@ -8,7 +8,7 @@ from .polygon import Polygon
 from .mapping import SemiIdentityMapping
 
 if TYPE_CHECKING:
-    from typing_ import EdgeCollection, AdjacentList, Vertex, Edge, Coordinate2D, Segment
+    from ..typing_ import EdgeCollection, AdjacentList, Vertex, Edge, Coordinate2D, Segment
 
 
 # TODO: add self-implemented nodes and edge classes

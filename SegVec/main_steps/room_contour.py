@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from typing_ import SingleConnectedComponent, Contour
+    from ..typing_ import SingleConnectedComponent, Contour
 
 import importlib
 
@@ -9,9 +9,9 @@ import numpy as np
 import torch
 from torch.optim import RMSprop
 
-from entity.polygon import Polygon
-from softras.objective import log_iou, boundary, orthogonal
-from softras.rasterizer import Base2DPolygonRasterizer as SoftRasterizer
+from ..entity.polygon import Polygon
+from ..softras.objective import log_iou, boundary, orthogonal
+from ..softras.rasterizer import Base2DPolygonRasterizer as SoftRasterizer
 
 
 class PolygonVertexIterator:

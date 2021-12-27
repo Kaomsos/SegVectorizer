@@ -1,10 +1,10 @@
 # %%
-from utils import plot_wcl_against_target, plot_position_of_rects, plot_wcl_o_against_target
-from vetorizer import Vectorizer, PaletteConfiguration
+from SegVec.utils import plot_wcl_against_target, plot_position_of_rects, plot_wcl_o_against_target
+from SegVec.vetorizer import Vectorizer, PaletteConfiguration
 import numpy as np
 from PIL import Image
 from matplotlib import pyplot as plt
-from utils import palette
+from SegVec.utils import palette
 
 
 ###########################################
