@@ -6,6 +6,8 @@ from PIL import Image
 from matplotlib import pyplot as plt
 from utils import palette
 
+
+###########################################
 # create a PaletteConfiguration
 p_config = PaletteConfiguration(palette)
 p_config.add_open("door&window")
@@ -19,6 +21,8 @@ for item in ['bathroom/washroom',
 p_config.add_boundary("wall")
 
 
+##################################################
+# defining top-level conversion functions
 def convert_a_image(path, palette_config=p_config):
     vectorizer = Vectorizer(palette_config=p_config)
     wcl_o = vectorizer(path=path)
