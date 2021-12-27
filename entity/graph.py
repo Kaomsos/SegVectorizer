@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from typing_ import EdgeCollection, AdjacentList, Vertex, Edge, Coordinate2D, Segment
 
 
+# TODO: add self-implemented nodes and edge classes
 class UndirectedGraph:
     # adjacency list representation is implemented
     # for the sparsity of wall center lines
@@ -97,6 +98,7 @@ class UndirectedGraph:
         old = self._next_vertex
         self._adjacency_list[old] = []
         self._next_vertex += 1
+        self._n += 1
         return old
 
     def remove_vertex(self, v: Vertex):
@@ -284,6 +286,12 @@ class WallCenterLine(UndirectedGraph):
         i = self._v2i[v]
         return self._cur_coordinates[i]
 
+    def get_coordinates_by_e(self, e: Edge) -> np.ndarray | Segment:
+        i, j = e
+        c1 = self.get_coordinate_by_v(i)
+        c2 = self.get_coordinate_by_v(j)
+        return c1, c2
+
     def merge_vertices(self, i: Vertex, j: Vertex):
         update_which = self._v2i[i]
         remove_which = self._v2i[j]
@@ -329,11 +337,11 @@ class WallCenterLineWithOpenPoints(WallCenterLine):
 
     def add_vertex(self, coord: Coordinate2D) -> Vertex:
         v = super(WallCenterLineWithOpenPoints, self).add_vertex()
-        self._cur_coordinates = np.append(self._cur_coordinates, coord, axis=0)
+        self._cur_coordinates = np.vstack((self._cur_coordinates, coord))
         self._update_v2i_i2v()
         return v
 
-    def insert_open_to_edge(self, seg: Segment, e: Edge):
+    def insert_open_to_edge(self, seg: Segment, e: Edge, type_=None):
         self._check_edge_exists(e)
         e1 = self.get_coordinate_by_v(e[0])
         e2 = self.get_coordinate_by_v(e[1])
@@ -357,4 +365,27 @@ class WallCenterLineWithOpenPoints(WallCenterLine):
         self.connect_vertices(e[0], to_e1)
         self.connect_vertices(e[1], to_e2)
 
+        # add property to these edges
+        self._add_to_opens((v1, v2))
+        if type_ is not None and type_ == 'door':
+            self._add_to_doors((v1, v2))
+        elif type_ is not None and type_ == 'windows':
+            self._add_to_windows((v1, v2))
+
+    def _add_to_opens(self, e: Edge):
+        self._check_edge_exists(e)
+        self._add_edge_to_list(e, self._open_edge)
+
+    def _add_to_windows(self, e: Edge):
+        self._check_edge_exists(e)
+        self._add_edge_to_list(e, self._window_edge)
+
+    def _add_to_doors(self, e: Edge):
+        self._check_edge_exists(e)
+        self._add_edge_to_list(e, self._door_edge)
+
+    @staticmethod
+    def _add_edge_to_list(e: Edge, l: list):
+        l.append(e)
+        l.append(e[::-1])
 

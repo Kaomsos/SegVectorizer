@@ -39,7 +39,7 @@ class TestOpenPointExtraction(unittest.TestCase):
     def test_rect_fit(self):
         from geometry import find_connected_components
         from utils import palette
-        from open_points import SoftRasFitter
+        from open_points_extraction import SoftRasFitter
 
         # get all door/window components
         self._init(path='data/flat_0.png')
@@ -257,6 +257,51 @@ class TestPCA(unittest.TestCase):
             pass
 
 
-if __name__ == '__main__':
-    case = TestWallCenterOptimization()
-    case.test_coordinate_optimization()
+class TestOpenPointExtraction(unittest.TestCase):
+    def _init(self, path='../data/flat_1.png'):
+        from vetorizer import Vectorizer, PaletteConfiguration
+        from utils import palette
+
+        self.img = Image.open(path)
+        self.segmentation = np.array(self.img)
+
+        p_config = PaletteConfiguration()
+        p_config.add_open("door&window")
+        for item in ['bathroom/washroom',
+                     'livingroom/kitchen/dining add_room',
+                     'bedroom',
+                     'hall',
+                     'balcony',
+                     'closet']:
+            p_config.add_room(item)
+        p_config.add_boundary("wall")
+
+        self.assertTrue(isinstance(p_config.rooms, set))
+        for e in p_config.rooms:
+            self.assertTrue(isinstance(e, str))
+        self.assertTrue(isinstance(p_config.opens, set))
+        for e in p_config.opens:
+            self.assertTrue(isinstance(e, str))
+        self.assertTrue(isinstance(p_config.boundaries, set))
+        for e in p_config.boundaries:
+            self.assertTrue(isinstance(e, str))
+
+        self.vectorizer = Vectorizer(palette=palette, palette_config=p_config)
+
+    def test_open_points_extraction(self):
+        from open_points_extraction import insert_open_points_in_wcl
+        from utils import plot_wcl_o_against_target
+        import pickle
+
+        self._init(path='../data/flat_0.png')
+        segmentation = np.array(self.img)
+        opens, boundary, rooms = self.vectorizer._extract_connected_components(segmentation)
+        rects = [self.vectorizer._get_rectangle(o) for o in opens]
+
+        with open("../data/wcl-1.pickle", 'rb') as f:
+            wcl = pickle.load(f)
+
+        # the function that we really want to test
+        wcl_o = insert_open_points_in_wcl(rects, wcl)
+
+        plot_wcl_o_against_target(wcl_o, boundary)

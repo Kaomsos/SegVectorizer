@@ -80,17 +80,14 @@ class TestVectorizer(unittest.TestCase):
 
     def test_vectorize(self):
         import pickle
-        from utils import plot_wcl_against_target, plot_position_of_rects
+        from utils import plot_wcl_against_target, plot_position_of_rects, plot_wcl_o_against_target
         self._init(path='../data/flat_0.png')
 
-        self.vectorizer._vectorize(self.segmentation)
+        wcl_o = self.vectorizer._vectorize(self.segmentation)
+        plot_wcl_o_against_target(wcl_o, self.vectorizer.boundary)
 
         # with open("../data/wcl-1.pickle", 'rb') as f:
         #     self.wcl = pickle.load(f)
-
-        plot_wcl_against_target(self.vectorizer.wcl, self.vectorizer.boundary, show=False)
-        plot_position_of_rects(self.vectorizer.rects, color='red', show=False)
-        plt.show()
 
     def plot_contours_against_image(self, contours: List[Polygon]):
         from utils import plot_polygon

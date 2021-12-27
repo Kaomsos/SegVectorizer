@@ -1,24 +1,25 @@
 from __future__ import annotations
-
-import importlib
 from abc import abstractmethod, ABC
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
+if TYPE_CHECKING:
+    from typing_ import SingleConnectedComponent, WallCenterLine
 
 import torch
 from torch.optim import RMSprop
+from sklearn.decomposition import PCA
+import numpy as np
+import importlib
 
 from objective import log_iou
 from rasterizer import FixedCenterRectangle2DRasterizer as RectangleRasterizer
 
-if TYPE_CHECKING:
-    from typing_ import SingleConnectedComponent
-
-from sklearn.decomposition import PCA
-import numpy as np
-
+from entity.graph import WallCenterLineWithOpenPoints as WCL_O
 from entity.polygon import Rectangle
+from geometry import project_seg_to_seg, distance_seg_to_segments
 
 
+###########################################
+# fitting rectangles
 class RectangleFitter(ABC):
     @abstractmethod
     def fit(self, target: SingleConnectedComponent) -> Rectangle:
@@ -137,5 +138,29 @@ class SoftRasFitter(RectangleFitter):
 
 
 def fit_open_points(target: SingleConnectedComponent, fitter=PCAFitter()) -> Rectangle:
+    """
+    a wrapper for Rectangle Fitter
+    :param target:
+    :param fitter:
+    :return:
+    """
     rect = fitter.fit(target)
     return rect
+
+
+##########################################################
+# compute the final position for open points
+def insert_open_points_in_wcl(opens: List[Rectangle], wcl: WallCenterLine) -> WCL_O:
+    wcl_o = WCL_O.from_wcl(wcl)
+    for rect in opens:
+        segs = wcl_o.segments_collection
+        seg = rect.ends
+        ds = distance_seg_to_segments(seg=seg, segments=segs)
+
+        which = ds.argmin()
+        to = (segs[0][which], segs[1][which])
+        e = wcl_o.i2e[which]
+
+        proj = project_seg_to_seg(seg, to)
+        wcl_o.insert_open_to_edge(proj, e)
+    return wcl_o

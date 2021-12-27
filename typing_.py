@@ -30,6 +30,7 @@ Polygon = entity.polygon.Polygon
 Rectangle = entity.polygon.Rectangle
 Contour = Polygon
 WallCenterLine = entity.graph.WallCenterLine
+WallCenterLineWithOpenPoints = entity.graph.WallCenterLineWithOpenPoints
 
 
 Coordinate2D = Point = Union[Tuple[float, float], np.ndarray]

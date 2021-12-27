@@ -115,7 +115,7 @@ class Rectangle:
         assert self.has_theta or self.has_vec
 
     @property
-    def ends(self) -> Tuple[Coordinate2D, Coordinate2D]:
+    def ends(self) -> Tuple[Coordinate2D, Coordinate2D] | np.ndarray:
         assert self.has_theta or self.has_vec
 
         if self.has_vec:

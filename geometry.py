@@ -108,13 +108,12 @@ def distance_p_to_segments(point: np.ndarray,
 
 def distance_seg_to_segments(seg: Tuple[np.ndarray, np.ndarray],
                              segments: SegmentCollection
-                             ) -> float:
+                             ) -> np.ndarray:
     p1, p2 = seg
     d1 = distance_p_to_segments(p1, segments)
     d2 = distance_p_to_segments(p2, segments)
     d = d1 + d2
     return d
-
 
 
 def project_seg_to_seg(src: Tuple[np.ndarray, np.ndarray],

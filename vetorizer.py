@@ -9,7 +9,7 @@ from entity.graph import WallCenterLine
 from geometry import find_connected_components
 from room_contour_optimization import alternating_optimize as fit_room_contour
 from wall_centerline_optimization import alternating_optimize as fit_wall_center_line
-from open_points import fit_open_points
+from open_points_extraction import fit_open_points, insert_open_points_in_wcl
 
 
 class PaletteConfiguration:
@@ -103,9 +103,13 @@ class Vectorizer:
         # wall center line optimization
         wcl = self._get_wall_center_line(room_contours, boundary_cc)
 
+        wcl_o = insert_open_points_in_wcl(rects, wcl)
+
         self.rects = rects
         self.boundary = boundary_cc
         self.wcl = wcl
+
+        return wcl_o
 
     def _extract_connected_components(self, segmentation):
         open_cc: List[SingleConnectedComponent] = []

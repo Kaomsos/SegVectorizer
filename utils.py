@@ -1,14 +1,14 @@
 from __future__ import annotations
 import numpy as np
 import torch
-from matplotlib import pyplot as plt, pyplot
+from matplotlib import pyplot as plt
 from torchviz import make_dot
 from entity.graph import WallCenterLine
 from entity.image import BinaryImage
 from entity.polygon import Polygon
 from typing import TYPE_CHECKING, List
 if TYPE_CHECKING:
-    from typing_ import WallCenterLine, Polygon, Rectangle
+    from typing_ import WallCenterLine, Polygon, Rectangle, WallCenterLineWithOpenPoints
 import warnings
 
 __all__ = ["plot_binary_image",
@@ -113,6 +113,18 @@ def plot_position_of_rects(l: List[Rectangle], color="#3399ff", show=False):
 
     if show:
         plt.show()
+
+
+def plot_wcl_o_against_target(wcl_o: WallCenterLineWithOpenPoints, target: np.ndarray, title='', show=True):
+    plot_wcl_against_target(wcl_o, target, title=title, show=False)
+
+    for e in wcl_o._open_edge:
+        p1, p2 = wcl_o.get_coordinates_by_e(e)
+        plt.plot([p1[0], p2[0]], [p1[1], p2[1]], color='red')
+
+    if show:
+        plt.show()
+
 
 palette = {
      'background': (255, 255, 255),
