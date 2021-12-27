@@ -32,7 +32,7 @@ class VertexReducer:
 
     def reduce_by_condition_x(self, delta_x: float):
         g = kneighbors_graph(self._wcl.V, 3, mode='distance', include_self=False)
-        g = (g > 0).toarray() & (g < delta_x).toarray()
+        g = (g.toarray() > 0) & (g.toarray() < delta_x)
         edges = np.argwhere(np.triu(g | g.T)).tolist()
         i2v = self._wcl.i2v
         after_merge = SemiIdentityMapping()
