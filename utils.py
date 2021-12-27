@@ -19,7 +19,9 @@ __all__ = ["plot_binary_image",
            'plot_wall_center_lines',
            'plot_wcl_against_target',
            'viz_computation_graph',
-           'plot_position_of_rects',]
+           'plot_position_of_rects',
+           'palette',
+           ]
 
 
 def plot_binary_image(bin_arr, title="", show=True):

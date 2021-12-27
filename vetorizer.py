@@ -1,10 +1,14 @@
 from __future__ import annotations
-from typing import List, Dict, Set, TYPE_CHECKING
+from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from typing_ import WallCenterLine, Rectangle, Palette, Color, SingleConnectedComponent, Contour
+    from typing import List, Dict, Set
+    from typing_ import (WallCenterLine, Rectangle, Palette, Color,
+                         SingleConnectedComponent, Contour, WallCenterLineWithOpenPoints)
 
 from collections import UserDict
 import numpy as np
+from pathlib import Path
+from PIL import Image
 
 from entity.graph import WallCenterLine
 from geometry import find_connected_components
@@ -140,7 +144,20 @@ class Vectorizer:
         self._boundary_colors = config.boundaries
         self._room_colors = config.rooms
 
-    def _vectorize(self, segmentation):
+    def __call__(self,
+                 segmentation: np.ndarray = None,
+                 path: str | Path = None
+                 ) -> WallCenterLineWithOpenPoints:
+        if segmentation is None and path is not None:
+            img = Image.open(path)
+            segmentation = np.array(img)
+        elif segmentation is None and path is None:
+            raise ValueError('not enough parameters to define a segmentation')
+
+        wcl_o = self._vectorize(segmentation)
+        return wcl_o
+
+    def _vectorize(self, segmentation)  -> WallCenterLineWithOpenPoints:
         # init and get hyper_parameters
         open_cc, boundary_cc, room_cc = self._extract_connected_components(segmentation)
         rects: List[Rectangle] = [self._get_rectangle(o) for o in open_cc]
