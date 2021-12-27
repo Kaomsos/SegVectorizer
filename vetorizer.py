@@ -79,7 +79,7 @@ class Vectorizer:
         self._delta_x = None
         self._delta_y = None
         self._downscale = 5
-        self._max_iter_wcl_alt_opt = 5
+        self._max_iter_wcl_alt_opt = 10
         self._max_iter_wcl_coord_opt = 5
 
     def _parse_palette(self, config: PaletteConfiguration):
@@ -91,7 +91,7 @@ class Vectorizer:
                                  for cls in config.rooms if cls in self._palette.keys()])
 
     def _vectorize(self, segmentation):
-        # init and get hyper_paramenters
+        # init and get hyper_parameters
         open_cc, boundary_cc, room_cc = self._extract_connected_components(segmentation)
         rects: List[Rectangle] = [self._get_rectangle(o) for o in open_cc]
 
@@ -138,9 +138,9 @@ class Vectorizer:
 
     def _set_hyper_parameters_by_rectangles(self, rects: List[Rectangle]) -> None:
         wall_width = np.array([(rect.w, rect.h) for rect in rects]).min(axis=-1).mean()
-        self._delta_a = wall_width * 2
-        self._delta_x = wall_width * 2
-        self._delta_y = wall_width * 2
+        self._delta_a = wall_width * 1.5
+        self._delta_x = wall_width * 1.5
+        self._delta_y = wall_width * 1.5
 
     def _get_room_contour(self, cc: SingleConnectedComponent) -> Contour:
         contour = fit_room_contour(cc,

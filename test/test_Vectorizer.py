@@ -58,7 +58,7 @@ class TestVectorizer(unittest.TestCase):
     def test_vectorize_get_wall_center_lines(self):
         from typing_ import Contour, WallCenterLine
 
-        self._init(path='../data/flat_1.png')
+        self._init(path='../data/flat_0.png')
 
         segmentation = np.array(self.img)
 
@@ -79,15 +79,11 @@ class TestVectorizer(unittest.TestCase):
         pass
 
     def test_vectorize(self):
-        import pickle
         from utils import plot_wcl_against_target, plot_position_of_rects, plot_wcl_o_against_target
-        self._init(path='../data/flat_0.png')
+        self._init(path='../data/Figure_47541863.png')
 
         wcl_o = self.vectorizer._vectorize(self.segmentation)
         plot_wcl_o_against_target(wcl_o, self.vectorizer.boundary)
-
-        # with open("../data/wcl-1.pickle", 'rb') as f:
-        #     self.wcl = pickle.load(f)
 
     def plot_contours_against_image(self, contours: List[Polygon]):
         from utils import plot_polygon
