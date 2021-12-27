@@ -18,7 +18,7 @@ class TestVectorizer(unittest.TestCase):
         self.img = Image.open(path)
         self.segmentation = np.array(self.img)
 
-        p_config = PaletteConfiguration()
+        p_config = PaletteConfiguration(palette)
         p_config.add_open("door&window")
         for item in ['bathroom/washroom',
                      'livingroom/kitchen/dining add_room',
@@ -31,15 +31,15 @@ class TestVectorizer(unittest.TestCase):
 
         self.assertTrue(isinstance(p_config.rooms, set))
         for e in p_config.rooms:
-            self.assertTrue(isinstance(e, str))
+            self.assertTrue(isinstance(e, tuple))
         self.assertTrue(isinstance(p_config.opens, set))
         for e in p_config.opens:
-            self.assertTrue(isinstance(e, str))
+            self.assertTrue(isinstance(e, tuple))
         self.assertTrue(isinstance(p_config.boundaries, set))
         for e in p_config.boundaries:
-            self.assertTrue(isinstance(e, str))
+            self.assertTrue(isinstance(e, tuple))
 
-        self.vectorizer = Vectorizer(palette=palette, palette_config=p_config)
+        self.vectorizer = Vectorizer(palette_config=p_config)
 
     def test_vectorizer_get_components(self):
         from entity.image import SingleConnectedComponent

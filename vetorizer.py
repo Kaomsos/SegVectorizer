@@ -3,6 +3,7 @@ from typing import Tuple, List, Dict, Set, TYPE_CHECKING
 if TYPE_CHECKING:
     from typing_ import WallCenterLine, Rectangle, Palette, Color, SingleConnectedComponent, Contour
 
+from collections import UserDict
 import numpy as np
 
 from entity.graph import WallCenterLine
@@ -12,40 +13,90 @@ from wall_centerline_optimization import alternating_optimize as fit_wall_center
 from open_points_extraction import fit_open_points, insert_open_points_in_wcl
 
 
-class PaletteConfiguration:
-    default_open = ("door", "window", "door&window")
+class PaletteConfiguration(UserDict):
+    """
+     an adaptor of palette
+    """
+    default_door = ("door", )
+    default_window = ("window", )
+    default_open = ("door&window", )
     default_boundary = ("wall",)
     default_room = ("bedroom", "living room", "kitchen", "dining room")
 
     def __init__(self,
+                 palette: Palette = None,
+                 add_door=(),
+                 add_window=(),
                  add_open=(),
                  add_boundary=(),
                  add_room=(),
                  ):
-        self._open: Set[str] = set(self.default_open) | set(add_open)
-        self._boundary: Set[str] = set(self.default_boundary) | set(self._open) | set(add_boundary)
-        self._room: Set[str] = set(self.default_room) | set(add_room)
+        super(PaletteConfiguration, self).__init__()
+        if palette is not None:
+            self.data.update(palette)
+
+        door: Set[str] = set(self.default_door) | set(add_door)
+        window: Set[str] = set(self.default_window) | set(add_window)
+
+        open_: Set[str] = set(self.default_open) | door | window | set(add_open)
+        boundary: Set[str] = set(self.default_boundary) | set(open_) | set(add_boundary)
+        room: Set[str] = set(self.default_room) | set(add_room)
+
+        self._agg: Dict[str, Set[str]] = {
+            "door": door,
+            "window": window,
+            "open": open_,
+            "boundary": boundary,
+            "room": room,
+        }
+
+    def add_door(self, item: str):
+        self._agg["door"].add(item)
+
+        self._agg["open"].add(item)
+        self._agg["boundary"].add(item)
+
+    def add_window(self, item: str):
+        self._agg["window"].add(item)
+
+        self._agg["open"].add(item)
+        self._agg["boundary"].add(item)
 
     def add_open(self, item: str):
-        self._open.add(item)
+        self._agg["open"].add(item)
+
+        self._agg["boundary"].add(item)
 
     def add_boundary(self, item: str):
-        self._boundary.add(item)
+        self._agg["boundary"].add(item)
 
     def add_room(self, item: str):
-        self._room.add(item)
+        self._agg["room"].add(item)
+
+    def get_colors(self, type_: str) -> Set[Color]:
+        keys = self._agg.get(type_, [])
+        colors = filter(lambda x: x is not None, [self.data.get(k, None) for k in keys])
+        return set(colors)
 
     @property
-    def opens(self):
-        return set(self._open)
+    def doors(self) -> Set[Color]:
+        return self.get_colors("door")
 
     @property
-    def boundaries(self):
-        return set(self._boundary)
+    def windows(self) -> Set[Color]:
+        return self.get_colors("window")
 
     @property
-    def rooms(self):
-        return set(self._room)
+    def opens(self) -> Set[Color]:
+        return self.get_colors("open")
+
+    @property
+    def boundaries(self) -> Set[Color]:
+        return self.get_colors("boundary")
+
+    @property
+    def rooms(self) -> Set[Color]:
+        return self.get_colors("room")
 
 
 p_config = PaletteConfiguration()
@@ -53,12 +104,12 @@ p_config = PaletteConfiguration()
 
 class Vectorizer:
     def __init__(self,
-                 palette: Palette,
                  palette_config: PaletteConfiguration = p_config,
                  ) -> None:
-        self._palette = palette
         self._palette_config = palette_config
 
+        self._door_colors: Set[Color] = None
+        self._window_colors: Set[Color] = None
         self._open_colors: Set[Color] = None
         self._boundary_colors: Set[Color] = None
         self._room_colors: Set[Color] = None
@@ -83,12 +134,11 @@ class Vectorizer:
         self._max_iter_wcl_coord_opt = 5
 
     def _parse_palette(self, config: PaletteConfiguration):
-        self._open_colors = set([self._palette.get(cls)
-                                 for cls in config.opens if cls in self._palette.keys()])
-        self._boundary_colors = set([self._palette.get(cls)
-                                     for cls in config.boundaries if cls in self._palette.keys()])
-        self._room_colors = set([self._palette.get(cls)
-                                 for cls in config.rooms if cls in self._palette.keys()])
+        self._door_colors = config.doors
+        self._window_colors = config.windows
+        self._open_colors = config.opens
+        self._boundary_colors = config.boundaries
+        self._room_colors = config.rooms
 
     def _vectorize(self, segmentation):
         # init and get hyper_parameters
