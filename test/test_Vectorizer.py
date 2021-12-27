@@ -80,7 +80,7 @@ class TestVectorizer(unittest.TestCase):
 
     def test_vectorize(self):
         from SegVec.utils import plot_wcl_against_target, plot_position_of_rects, plot_wcl_o_against_target
-        from SegVec.vetorizer import Vectorizer, PaletteConfiguration
+        from SegVec import Vectorizer, PaletteConfiguration
         from SegVec.utils import palette
 
         path = '../data/Figure_47541863.png'

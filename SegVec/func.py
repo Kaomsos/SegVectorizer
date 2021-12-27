@@ -23,7 +23,7 @@ p_config.add_boundary("wall")
 
 ##################################################
 # defining top-level conversion functions
-def convert_a_image(path, palette_config=p_config):
+def convert_an_image(path, palette_config=p_config):
     vectorizer = Vectorizer(palette_config=p_config)
     wcl_o = vectorizer(path=path)
     plot_wcl_o_against_target(wcl_o, vectorizer.boundary)
@@ -38,7 +38,7 @@ def convert_a_segmentation(segmentation, palette_config=p_config):
 # %%
 if __name__ == "__main__":
     path = 'data/Figure_47541863.png'
-    convert_a_image(path)
+    convert_an_image(path)
 
 
 
