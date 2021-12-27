@@ -4,15 +4,15 @@ import numpy as np
 from PIL import Image
 from matplotlib import pyplot as plt
 
-import main_steps.wall_center_line
+import SegVec.main_steps.wall_center_line
 
 
 class TestWallCenterOptimization(unittest.TestCase):
     def test_init_(self):
         import pickle
-        from entity.graph import WallCenterLine
-        from utils import plot_wcl_against_target
-        from geometry import find_boundaries
+        from SegVec.entity.graph import WallCenterLine
+        from SegVec.utils import plot_wcl_against_target
+        from SegVec.geometry import find_boundaries
 
         # get add_boundary
         path = path = '../data/flat_0.png'
@@ -54,12 +54,12 @@ class TestWallCenterOptimization(unittest.TestCase):
             print(f'try merging {i2v[i]} and {i2v[j]}')
             self.wcl.merge_vertices(i2v[i_after], i2v[j_after])
             after_merge[j_after] = i_after
-        from utils import plot_wall_center_lines
+        from SegVec.utils import plot_wall_center_lines
         plot_wall_center_lines(self.wcl)
         pass
 
     def test_undirected_graph(self):
-        from entity.graph import UndirectedGraph
+        from SegVec.entity.graph import UndirectedGraph
         n_v = 6
         edges = [(0, 1), (1, 2), (2, 3), (3, 4), (4, 0)]
         g = UndirectedGraph(n_v, edges)
@@ -93,14 +93,14 @@ class TestWallCenterOptimization(unittest.TestCase):
     def test_junction_reduction(self):
         # step1: reduce by condition x
         # step2: reduce by condition y
-        import main_steps.wall_center_line as wclo
-        from utils import plot_wall_center_lines, plot_wcl_against_target
+        import SegVec.main_steps.wall_center_line as wclo
+        from SegVec.utils import plot_wall_center_lines, plot_wcl_against_target
 
         self.test_init_()
 
         plot_wcl_against_target(self.wcl, self.boundary, title='before processing')
 
-        reducer = main_steps.wall_center_line.VertexReducer(self.wcl)
+        reducer = SegVec.main_steps.wall_center_line.VertexReducer(self.wcl)
 
         reducer.reduce_by_condition_x(10)
         plot_wall_center_lines(self.wcl, title=f"reduce_iter=1, after condition x")
@@ -109,20 +109,20 @@ class TestWallCenterOptimization(unittest.TestCase):
         plot_wall_center_lines(self.wcl, title=f"reduce_iter=1, after condition y")
 
     def test_coordinate_optimization(self):
-        import main_steps.wall_center_line as wclo
-        from utils import plot_wcl_against_target
+        import SegVec.main_steps.wall_center_line as wclo
+        from SegVec.utils import plot_wcl_against_target
 
         self.test_junction_reduction()
         plot_wcl_against_target(self.wcl, self.boundary, title='after reduction')
 
-        self.optimizer = main_steps.wall_center_line.CoordinateOptimizer(self.wcl, max_iter=10, lr=0.1)
+        self.optimizer = SegVec.main_steps.wall_center_line.CoordinateOptimizer(self.wcl, max_iter=10, lr=0.1)
         self.optimizer.fit(self.boundary, verbose=True)
         plot_wcl_against_target(self.wcl, self.boundary, title='after optimization')
 
     def test_alternating_optimization(self):
-        from main_steps.wall_center_line import CoordinateOptimizer
-        from main_steps.wall_center_line import VertexReducer
-        from utils import plot_wcl_against_target
+        from SegVec.main_steps.wall_center_line import CoordinateOptimizer
+        from SegVec.main_steps.wall_center_line import VertexReducer
+        from SegVec.utils import plot_wcl_against_target
 
         self.test_init_()
 
@@ -155,12 +155,12 @@ class TestWallCenterOptimization(unittest.TestCase):
         #     pickle.dump(self.wcl, f)
 
     def interactive_merge_vertices(self, i, j):
-        from utils import plot_wall_center_lines
+        from SegVec.utils import plot_wall_center_lines
         self.wcl.merge_vertices(i, j)
         plot_wall_center_lines(self.wcl, title=f"merge vertices {i} and {j} into {i}")
 
     def interactive_append_v_to_e(self, v, e):
-        from utils import plot_wall_center_lines
+        from SegVec.utils import plot_wall_center_lines
         self.wcl.append_vertex_to_edge(v, e)
         plot_wall_center_lines(self.wcl, title=f"append vertex {v} to edge {e}")
 
@@ -172,7 +172,7 @@ class TestWallCenterLine(unittest.TestCase):
             self.wcl = pickle.load(f)
 
     def test_wcl_with_open(self):
-        from entity.graph import WallCenterLineWithOpenPoints
+        from SegVec.entity.graph import WallCenterLineWithOpenPoints
         self._init()
         self.wcl_o = WallCenterLineWithOpenPoints.from_wcl(self.wcl)
         pass

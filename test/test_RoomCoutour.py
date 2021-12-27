@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 
 class TestRoomContourOptimization(unittest.TestCase):
     def test_init(self):
-        from geometry import find_rooms
+        from SegVec.geometry import find_rooms
         path = path = 'data/flat_0.png'
         self.img = Image.open(path)
         rooms = find_rooms(self.img)
@@ -22,10 +22,10 @@ class TestRoomContourOptimization(unittest.TestCase):
         # self.plot_rooms()
 
     def test_vertices_reduction(self):
-        from image_reader import BinaryImageFromFile
-        from entity.polygon import Polygon
-        from main_steps.room_contour import VertexReducer
-        from utils import plot_polygon_comparing_cc
+        from SegVec.image_reader import BinaryImageFromFile
+        from SegVec.entity.polygon import Polygon
+        from SegVec.main_steps.room_contour import VertexReducer
+        from SegVec.utils import plot_polygon_comparing_cc
 
         path = "data/rect2.jpg"
         img = BinaryImageFromFile(path)
@@ -38,13 +38,13 @@ class TestRoomContourOptimization(unittest.TestCase):
         pass
 
     def test_coordinate_optimization(self):
-        from image_reader import BinaryImageFromFile
+        from SegVec.image_reader import BinaryImageFromFile
         import torch
         from torch.optim import RMSprop
-        from softras.objective import orthogonal
-        from softras.objective import boundary
-        from softras.objective import log_iou
-        from softras.rasterizer import Base2DPolygonRasterizer
+        from SegVec.softras.objective import orthogonal
+        from SegVec.softras.objective import boundary
+        from SegVec.softras.objective import log_iou
+        from SegVec.softras.rasterizer import Base2DPolygonRasterizer
 
         path = "data/rect1.jpg"
         self.sigma = 10
@@ -76,8 +76,8 @@ class TestRoomContourOptimization(unittest.TestCase):
             print(f"iter = {i + 1}, gradient = {plg.grad}, -log_iou = {-iou.detach().numpy()}")
 
     def test_alternating_optimization(self):
-        from utils import plot_polygon_comparing_cc, plot_contours
-        from entity.polygon import Polygon
+        from SegVec.utils import plot_polygon_comparing_cc, plot_contours
+        from SegVec.entity.polygon import Polygon
         self.test_init()
         opt_contours = []
         for i, cc in enumerate(self.rooms):
@@ -98,10 +98,10 @@ class TestRoomContourOptimization(unittest.TestCase):
 
     @staticmethod
     def alternating_optimizing(cc):
-        from utils import plot_polygon_comparing_cc, plot_contours
-        from entity.polygon import Polygon
-        from main_steps.room_contour import VertexReducer
-        from main_steps.room_contour import CoordinateOptimizer
+        from SegVec.utils import plot_polygon_comparing_cc, plot_contours
+        from SegVec.entity.polygon import Polygon
+        from SegVec.main_steps.room_contour import VertexReducer
+        from SegVec.main_steps.room_contour import CoordinateOptimizer
 
         plot_contours(cc)
         plg = Polygon(connected_component=cc, tol=2)

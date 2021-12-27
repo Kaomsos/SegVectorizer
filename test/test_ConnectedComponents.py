@@ -12,15 +12,15 @@ class TestFindConnectedComponents(unittest.TestCase):
         self.palette = self.img.getcolors()
 
     def test_find_components(self):
-        from geometry import find_connected_components
-        from utils import palette
+        from SegVec.geometry import find_connected_components
+        from SegVec.utils import palette
         self.test_init()
         for color in palette.values():
             c = find_connected_components(self.img, color, 0)
             print(f'n_connected_components = {len(c)} for color: {color}')
 
     def test_find_rooms(self):
-        from geometry import find_rooms
+        from SegVec.geometry import find_rooms
         self.test_init()
         rooms = find_rooms(self.img)
 
@@ -31,8 +31,8 @@ class TestFindConnectedComponents(unittest.TestCase):
         plt.show()
 
     def test_SingleCC(self):
-        from geometry import find_boundaries
-        from utils import plot_binary_image
+        from SegVec.geometry import find_boundaries
+        from SegVec.utils import plot_binary_image
         self.test_init()
 
         all_ = find_boundaries(self.img, threshold=5)
