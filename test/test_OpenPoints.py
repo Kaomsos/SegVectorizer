@@ -11,9 +11,9 @@ class TestOpenPointExtraction(unittest.TestCase):
         self.palette = self.img.getcolors()
 
     def test_find_door_window(self):
-        from SegVec.geometry import find_connected_components
-        from SegVec.utils import palette
-        from SegVec.utils import plot_binary_image
+        from segvec.geometry import find_connected_components
+        from segvec.utils import palette
+        from segvec.utils import plot_binary_image
 
         self._init(path='data/flat_1.png')
 
@@ -35,9 +35,9 @@ class TestOpenPointExtraction(unittest.TestCase):
         plot_binary_image(self.all_cc, "all components")
 
     def test_rect_fit(self):
-        from SegVec.geometry import find_connected_components
-        from SegVec.utils import palette
-        from SegVec.main_steps.open_points import SoftRasFitter
+        from segvec.geometry import find_connected_components
+        from segvec.utils import palette
+        from segvec.main_steps.open_points import SoftRasFitter
 
         # get all door/window components
         self._init(path='data/flat_0.png')
@@ -116,7 +116,7 @@ class TestOpenPointExtraction(unittest.TestCase):
 
     def test_plot_rooms_contours(self):
         import pickle
-        from SegVec.geometry import find_rooms
+        from segvec.geometry import find_rooms
 
         self._init('data/flat_0.png')
 
@@ -147,7 +147,7 @@ class TestOpenPointExtraction(unittest.TestCase):
         plt.show()
 
     def test_plot_wcl(self):
-        from SegVec.utils import plot_wall_center_lines
+        from segvec.utils import plot_wall_center_lines
 
         self._init()
         self._load_wcl()
@@ -167,8 +167,8 @@ class TestOpenPointExtraction(unittest.TestCase):
             self.open_ends = pickle.load(f)
 
     def test_anchor_open_ends(self):
-        from SegVec.geometry import distance_seg_to_segments, project_seg_to_seg
-        from SegVec.utils import plot_wall_center_lines
+        from segvec.geometry import distance_seg_to_segments, project_seg_to_seg
+        from segvec.utils import plot_wall_center_lines
 
         self._init()
         self._load_wcl()
@@ -207,9 +207,9 @@ class TestPCA(unittest.TestCase):
         self.palette = self.img.getcolors()
 
     def test_find_door_window(self):
-        from SegVec.geometry import find_connected_components
-        from SegVec.utils import palette
-        from SegVec.utils import plot_binary_image
+        from segvec.geometry import find_connected_components
+        from segvec.utils import palette
+        from segvec.utils import plot_binary_image
 
         self._init(path='data/flat_1.png')
 
@@ -234,9 +234,9 @@ class TestPCA(unittest.TestCase):
         plot_binary_image(self.all_cc, "all components")
 
     def test_PCA(self):
-        from SegVec.geometry import find_connected_components
-        from SegVec.utils import palette
-        from SegVec.entity.image import SingleConnectedComponent
+        from segvec.geometry import find_connected_components
+        from segvec.utils import palette
+        from segvec.entity.image import SingleConnectedComponent
         from sklearn.decomposition import PCA
 
         self._init(path='data/flat_1.png')
@@ -257,8 +257,8 @@ class TestPCA(unittest.TestCase):
 
 class TestOpenPointExtraction(unittest.TestCase):
     def _init(self, path='../data/flat_1.png'):
-        from SegVec.vetorizer import Vectorizer, PaletteConfiguration
-        from SegVec.utils import palette
+        from segvec.vetorizer import Vectorizer, PaletteConfiguration
+        from segvec.utils import palette
 
         self.img = Image.open(path)
         self.segmentation = np.array(self.img)
@@ -287,8 +287,8 @@ class TestOpenPointExtraction(unittest.TestCase):
         self.vectorizer = Vectorizer(palette=palette, palette_config=p_config)
 
     def test_open_points_extraction(self):
-        from SegVec.main_steps.open_points import insert_open_points_in_wcl
-        from SegVec.utils import plot_wcl_o_against_target
+        from segvec.main_steps.open_points import insert_open_points_in_wcl
+        from segvec.utils import plot_wcl_o_against_target
         import pickle
 
         self._init(path='../data/flat_0.png')

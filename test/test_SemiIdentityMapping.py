@@ -1,5 +1,5 @@
 from unittest import TestCase
-from SegVec.entity.mapping import SemiIdentityMapping
+from segvec.entity.mapping import SemiIdentityMapping
 
 
 class TestSemiIdentityMapping(TestCase):

@@ -146,7 +146,7 @@ class CoordinateOptimizer:
             self.plot()
 
     def plot(self):
-        from SegVec.utils import plot_wall_center_lines
+        from segvec.utils import plot_wall_center_lines
         plt.imshow(1 - self._target, cmap='gray')
         plot_wall_center_lines(self._wcl)
         plt.show()
