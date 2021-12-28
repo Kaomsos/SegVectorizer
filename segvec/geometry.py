@@ -4,7 +4,7 @@ import numpy as np
 from torch import Tensor
 from typing import Tuple, List, Dict, TYPE_CHECKING
 if TYPE_CHECKING:
-    from .typing_ import SegmentCollection
+    from .typing_ import SegmentCollection, Color
 
 from skimage.measure import label
 
@@ -182,7 +182,7 @@ def get_bounding_box(points: Tensor) -> Tuple[Tensor, Tensor]:
 
 
 def find_connected_components(img,
-                              color: Tuple[int, int, int],
+                              color: Color,
                               threshold: float = 5,
                               tag=None,
                               ) -> List[SingleConnectedComponent]:
@@ -194,14 +194,24 @@ def find_connected_components(img,
     :param threshold:
     :return:
     """
-    arr = np.array(img)[..., :3]
-    assert len(arr.shape) == 3
-    assert arr.shape[-1] == 3
+    arr = np.array(img)
+    is_matrix: bool = None
+    if isinstance(color, int):
+        assert len(arr.shape) == 2, "image are not 2D"
+        is_matrix = True
+    elif isinstance(color, tuple) and len(color) == 3:
+        assert len(arr.shape) == 3 and arr.shape[-1] >= 3, "image doesn't match color type"
+        arr = arr[..., :3]
+        is_matrix = False
+    else:
+        raise ValueError(f"invalid color type: {color}")
 
-    iter_ = zip(np.moveaxis(arr, -1, 0), color)
-    bool_map = np.stack([channel == c for channel, c in iter_], axis=-1)
-    bin_arr = np.where(bool_map.all(axis=-1), 1, 0)
-
+    if is_matrix:
+        iter_ = zip(np.moveaxis(arr, -1, 0), color)
+        bool_map = np.stack([channel == c for channel, c in iter_], axis=-1)
+        bin_arr = np.where(bool_map.all(axis=-1), 1, 0)
+    else:
+        bin_arr = np.where(arr == color, 1, 0)
     # the core function (skimage.measure.label)
     labels, num = label(bin_arr, return_num=True, background=0)
 
