@@ -4,7 +4,8 @@ from . import softras
 from . import geometry
 from . import image_reader
 from . import func
-from . import typing_
+if False:
+    from . import typing_
 from . import utils
 from . import vetorizer
 

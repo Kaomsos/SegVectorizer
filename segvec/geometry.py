@@ -206,7 +206,7 @@ def find_connected_components(img,
     else:
         raise ValueError(f"invalid color type: {color}")
 
-    if is_matrix:
+    if not is_matrix:
         iter_ = zip(np.moveaxis(arr, -1, 0), color)
         bool_map = np.stack([channel == c for channel, c in iter_], axis=-1)
         bin_arr = np.where(bool_map.all(axis=-1), 1, 0)
