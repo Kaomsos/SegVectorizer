@@ -124,7 +124,7 @@ class TestVectorizer(unittest.TestCase):
 
     def test_2d_array(self):
         import pickle
-        with open("data/seg.pickle", 'rb') as f:
+        with open("../data/seg.pickle", 'rb') as f:
             seg = pickle.load(f)
         p = {
             '厨房': 0,

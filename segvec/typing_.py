@@ -3,6 +3,7 @@ from typing import Tuple, List, Dict, TypeVar, Generic, Union
 from collections.abc import Collection
 import numpy as np
 
+import entity.wall_center_line
 from . import entity
 
 
@@ -26,8 +27,8 @@ SingleConnectedComponent = entity.image.SingleConnectedComponent
 Polygon = entity.polygon.Polygon
 Rectangle = entity.polygon.Rectangle
 Contour = Polygon
-WallCenterLine = entity.graph.WallCenterLine
-WallCenterLineWithOpenPoints = entity.graph.WallCenterLineWithOpenPoints
+WallCenterLine = entity.wall_center_line.WallCenterLine
+WallCenterLineWithOpenPoints = entity.wall_center_line.WallCenterLineWithOpenPoints
 
 
 Coordinate2D = Point = Union[Tuple[float, float], np.ndarray]

@@ -10,7 +10,7 @@ import numpy as np
 from pathlib import Path
 from PIL import Image
 
-from .entity.graph import WallCenterLine
+from entity.wall_center_line import WallCenterLine
 from .geometry import find_connected_components
 from .main_steps.room_contour import alternating_optimize as fit_room_contour
 from .main_steps.wall_center_line import alternating_optimize as fit_wall_center_line

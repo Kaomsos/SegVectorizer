@@ -8,7 +8,7 @@ import torch
 from matplotlib import pyplot as plt
 from torchviz import make_dot
 
-from .entity.graph import WallCenterLine
+from entity.wall_center_line import WallCenterLine
 from .entity.image import BinaryImage
 from .entity.polygon import Polygon
 

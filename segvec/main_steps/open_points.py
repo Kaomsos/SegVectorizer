@@ -12,7 +12,7 @@ from sklearn.decomposition import PCA
 from torch.optim import RMSprop
 
 from ..softras import objective
-from ..entity.graph import WallCenterLineWithOpenPoints as WCL_O
+from entity.wall_center_line import WallCenterLineWithOpenPoints as WCL_O
 from ..entity.polygon import Rectangle
 from ..geometry import distance_seg_to_segments, project_seg_to_seg
 from ..softras.objective import log_iou

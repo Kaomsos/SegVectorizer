@@ -10,7 +10,7 @@ import segvec.main_steps.wall_center_line
 class TestWallCenterOptimization(unittest.TestCase):
     def test_init_(self):
         import pickle
-        from segvec.entity.graph import WallCenterLine
+        from entity.wall_center_line import WallCenterLine
         from segvec.utils import plot_wcl_against_target
         from segvec.geometry import find_boundaries
 
@@ -172,7 +172,7 @@ class TestWallCenterLine(unittest.TestCase):
             self.wcl = pickle.load(f)
 
     def test_wcl_with_open(self):
-        from segvec.entity.graph import WallCenterLineWithOpenPoints
+        from entity.wall_center_line import WallCenterLineWithOpenPoints
         self._init()
         self.wcl_o = WallCenterLineWithOpenPoints.from_wcl(self.wcl)
         pass
