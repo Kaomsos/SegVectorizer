@@ -185,14 +185,14 @@ class WallCenterLine(UndirectedGraph):
         self._init_coordinates = coordinates
         self._cur_coordinates = coordinates
 
-        ###############################
+        ##############################################################
         # defining mappings
         # Sets:
         #       i: a indices of v whose values are a natural sequence
         #       v: all vertices in current adjacency list (graph)
         #       p: all vertices in the initial adjacency list (graph)
         #       j: a indices of p whose values are a natural sequence
-        ###############################
+        ##############################################################
         # p2j and j2p are determined by the init codes above
         # and are somehow constant
         self._p2j = dict(zip(self._adjacency_list.keys(), range(self._n)))
@@ -229,10 +229,10 @@ class WallCenterLine(UndirectedGraph):
 
     @property
     def segments_matrix(self) -> Tuple[np.ndarray, np.ndarray]:
-        # return a matrix S(E, V) and E(E, V)
-        # such that given current coordinates array P(V, 2)
-        # (S @ P)(E, 2) will return an array of all current start point coordinates
-        # so is the matrix E(E, V)
+        # return a matrix S(e, v) and E(e, v)
+        # such that given current coordinates array P(v, 2)
+        # S(E, V) @ P(v, 2) will return an array of all current start point coordinates, and
+        # E(E, V) @ P(v, 2) will return an array end point coordinates
 
         edges = self.edges
 
@@ -252,6 +252,7 @@ class WallCenterLine(UndirectedGraph):
 
     @property
     def L(self) -> np.ndarray:
+        # a map from initial P to current V
         j2i = {j: self._v2i[self._p2v[p]] for j, p in self._j2p.items()}
         size = len(j2i)
         m = csr_matrix(([1] * size, (list(j2i.keys()), list(j2i.values()))), shape=(self._init_n, self._n))

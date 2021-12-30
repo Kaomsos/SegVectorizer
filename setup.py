@@ -19,7 +19,7 @@ setup(
         "scikit_image~=0.18.3",
         "scikit_learn~=1.0.2",
         "scipy~=1.7.1",
-        "torch",
+        "torch~=1.9.0",
         "torchviz~=0.0.2",
     ],
     data_files=data_files,
