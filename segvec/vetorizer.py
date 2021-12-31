@@ -196,7 +196,8 @@ class Vectorizer:
         ###########################################################
         # boundary is the union of open cc and wall cc
         # make a copy of open_cc by slicing
-        boundary_cc_list: List[SingleConnectedComponent] = open_cc[:]
+        # boundary_cc_list: List[SingleConnectedComponent] = open_cc[:]
+        boundary_cc_list: List[SingleConnectedComponent] = []
         for c in self._boundary_colors - self._open_colors:
             boundary_cc_list += find_connected_components(segmentation, c, threshold=self._boundary_threshold)
 
