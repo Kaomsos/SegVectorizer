@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 import segvec.main_steps.wall_center_line
 from entity.wall_center_line import WallCenterLine
 from segvec.utils import plot_wcl_against_target
-from segvec.geometry import find_boundaries
+from segvec.geometry import find_boundaries, rasterize_polygon
 
 
 class TestWallCenterOptimization(unittest.TestCase):
@@ -172,51 +172,54 @@ class TestWallCenterOptimization(unittest.TestCase):
 
 
 class TestWallCenterLine(unittest.TestCase):
-    def _init(self, path='../data/wcl-1.pickle'):
-        import pickle
+    def _init_wcl(self, path='../data/wcl-1.pickle', show=True):
         with open(path, 'rb') as f:
-            self.wcl = pickle.load(f)
+            self.wcl: WallCenterLine = pickle.load(f)
 
-    def test_wcl_with_open(self):
-        from entity.wall_center_line import WallCenterLineWithOpenPoints
-        self._init()
-        self.wcl_o = WallCenterLineWithOpenPoints.from_wcl(self.wcl)
-        pass
+        if show:
+            plot_wcl_against_target(self.wcl,
+                                    self.boundary + np.nan,
+                                    title="initial state"
+                                    )
 
-    def test_rooms(self):
-        # get add_boundary
-        path = '../data/flat_0.png'
+            plt.imshow(self.boundary + np.nan)
+            plot_rooms_in_wcl(wcl=self.wcl, title="rooms in wall center lines", show=True)
+
+    def _init_img(self, path='../data/flat_0.png', show=True):
         self.img = Image.open(path)
         self.boundary = np.zeros(self.img.size[::-1], dtype=int)
         for cc in find_boundaries(self.img):
             self.boundary |= cc.array
+        if show:
+            plt.imshow(self.boundary, cmap='gray')
+            plt.show()
 
-        plt.imshow(self.boundary, cmap='gray')
-        plt.show()
+    def test_wcl_with_open(self):
+        from entity.wall_center_line import WallCenterLineWithOpenPoints
+        self._init_wcl()
+        self.wcl_o = WallCenterLineWithOpenPoints.from_wcl(self.wcl)
+        pass
 
-        path = '../data/countours-1.pickle'
-        with open(path, 'rb') as f:
-            self.contours = pickle.load(f)
-
-        # plot all contours of rooms
-        # plt.imshow(np.array(self.img) + np.nan)
-        # for c in self.contours:
-        #     plt.plot(c.plot_x, c.plot_y)
-        # plt.show()
-        print('loaded contours from pickle file')
+    def test_room_type(self):
+        # get add_boundary
+        path = '../data/flat_0.png'
+        self._init_img(path)
 
         # construct a graph from contours
         path = '../data/wcl.pickle'
-        with open(path, 'rb') as f:
-            self.wcl = pickle.load(f)
-        plot_wcl_against_target(self.wcl,
-                                self.boundary + np.nan,
-                                title="initial state"
-                                )
+        self._init_wcl(path)
 
-        plt.imshow(self.boundary + np.nan)
-        plot_rooms_in_wcl(wcl=self.wcl, title="rooms in wall center lines", show=True)
-        pass
+        img_shape = self.boundary.shape
+        img = np.zeros_like(self.boundary, dtype=int)
+        for i, room in enumerate(self.wcl.rooms):
+            mask = rasterize_polygon(img_shape, room)
+            ras = np.where(mask, i + 1, 0)
+            img += ras
+            pass
+
+        plt.imshow(img, cmap='tab20', interpolation='none')
+        plt.colorbar()
+        plt.show()
 
 
 #####################################################################

@@ -1,12 +1,13 @@
 from __future__ import annotations
-import torch
-import numpy as np
-from torch import Tensor
-from typing import Tuple, List, Dict, TYPE_CHECKING
+from typing import Tuple, List, Dict, TYPE_CHECKING, Callable
 if TYPE_CHECKING:
     from .typing_ import SegmentCollection, Color
 
+import torch
+import numpy as np
+from torch import Tensor
 from skimage.measure import label
+from skimage.draw import polygon2mask
 
 from .entity.image import SingleConnectedComponent
 from .utils import palette
@@ -255,4 +256,12 @@ def find_boundaries(img, threshold=0) -> List[SingleConnectedComponent]:
         cc = find_connected_components(img, palette[type_], threshold=threshold)
         boundaries += cc
     return boundaries
+
+
+def rasterize_polygon(image_shape: Tuple[int, int],
+                      polygon: np.ndarray
+                      ) -> np.ndarray:
+    polygon = polygon[..., [1, 0]]
+    mask = polygon2mask(image_shape, polygon)
+    return mask
 
