@@ -188,7 +188,7 @@ class Vectorizer:
             door_cc += find_connected_components(segmentation, c, threshold=self._boundary_threshold, tag="door")
 
         ########################################################
-        # only open_cc will be returned
+        # only open_cc will be returned though door and windows are
         open_cc: List[SingleConnectedComponent] = window_cc + door_cc
         for c in self._open_colors - (self._window_colors | self._door_colors):
             open_cc += find_connected_components(segmentation, c, threshold=self._open_threshold)

@@ -9,6 +9,7 @@ import segvec.main_steps.wall_center_line
 from entity.wall_center_line import WallCenterLine
 from segvec.utils import plot_wcl_against_target
 from segvec.geometry import find_boundaries, rasterize_polygon
+from segvec.main_steps.room_type import count_pixels_in_region
 
 
 class TestWallCenterOptimization(unittest.TestCase):
@@ -214,6 +215,8 @@ class TestWallCenterLine(unittest.TestCase):
         for i, room in enumerate(self.wcl.rooms):
             mask = rasterize_polygon(img_shape, room)
             ras = np.where(mask, i + 1, 0)
+            count_pixels_in_region(self.img)
+
             img += ras
             pass
 

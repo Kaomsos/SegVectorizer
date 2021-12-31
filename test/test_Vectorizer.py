@@ -7,6 +7,8 @@ if TYPE_CHECKING:
     from segvec.typing_ import SingleConnectedComponent, Polygon
 import unittest
 from PIL import Image
+import pickle
+
 import numpy as np
 from segvec import convert_a_segmentation, PaletteConfiguration
 
@@ -123,8 +125,7 @@ class TestVectorizer(unittest.TestCase):
         plot_binary_image(bin_arr, show=True)
 
     def test_2d_array(self):
-        import pickle
-        with open("../data/seg.pickle", 'rb') as f:
+        with open("../data/seg_reduced.pickle", 'rb') as f:
             seg = pickle.load(f)
         p = {
             '厨房': 0,
@@ -166,4 +167,7 @@ class TestVectorizer(unittest.TestCase):
                                                   '设备平台', '储物间', '起居室', '空调', '管道',
                                                   '空调外机', '设备间', '衣帽间', '中空'),
                                         )
+
+        plt.imshow(seg, cmap='tab20', interpolation='none')
+        plt.show()
         convert_a_segmentation(seg, p_config)
