@@ -37,6 +37,7 @@ class EdgeMy(Tuple[Node, Node]):
         for k, v in property.items():
             setattr(self, k, v)
 
+
 # TODO: add self-implemented nodes and edge classes
 class UndirectedGraph:
     # adjacency list representation is implemented

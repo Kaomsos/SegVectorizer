@@ -16,26 +16,29 @@ class WallCenterLine(UndirectedGraph):
     def __init__(self, room_contours: List[Polygon]) -> None:
         coordinates = []
         edges = []
+        rooms = []
         start = 0
 
         ###############################################
         # iterate over all add_room contours (Polygon):
         # 1. gathering all the 2d coordinates
         # 2. construct a UndirectedGraph
-        for c in room_contours:
-            coordinates.append(c.numpy_array)
-            interval = len(c)
+        for plg in room_contours:
+            coordinates.append(plg.numpy_array)
+            interval = len(plg)
             for i in range(interval):
                 shift1 = i % interval
                 shift2 = (i + 1) % interval
                 edges.append((start + shift1, start + shift2))
+            rooms.append(list(range(start, start + interval)))
             start += interval
 
         # Initialize UndirectedGraph
         num_vertices = start
-        self._init_n = num_vertices
         super(WallCenterLine, self).__init__(num_vertices, edges)
 
+        self._init_n = num_vertices
+        self._rooms: List[List[Vertex]] = rooms
         # Gathering 2d coordinates as a big array
         coordinates = np.concatenate(coordinates, axis=0)
         self._init_coordinates = coordinates
@@ -57,6 +60,10 @@ class WallCenterLine(UndirectedGraph):
         self._p2v = SemiIdentityMapping()
         # v2i and i2v are are determined by the init codes above
         # and are variable
+        self._v2i = dict(zip(self._adjacency_list.keys(), range(self._n)))
+        self._i2v = dict(zip(range(self._n), self._adjacency_list.keys()))
+
+    def _update_v2i_i2v(self):
         self._v2i = dict(zip(self._adjacency_list.keys(), range(self._n)))
         self._i2v = dict(zip(range(self._n), self._adjacency_list.keys()))
 
@@ -139,11 +146,20 @@ class WallCenterLine(UndirectedGraph):
         S_p, E_p = S @ self._cur_coordinates, E @ self._cur_coordinates
         return S_p, E_p
 
-    def get_coordinate_by_v(self, v: Vertex) -> np.ndarray | Coordinate2D:
+    @property
+    def rooms(self) -> List[np.ndarray]:
+        coord = [self._get_coordinates_by_ps(ps) for ps in self._rooms]
+        return coord
+
+    def get_coordinate_by_v(self, v: Vertex) -> Coordinate2D:
         i = self._v2i[v]
         return self._cur_coordinates[i]
 
-    def get_coordinates_by_e(self, e: Edge) -> np.ndarray | Segment:
+    def _get_coordinates_by_ps(self, ps: List[Vertex]):
+        indices = [self._v2i[self._p2v[p]] for p in ps]
+        return self._cur_coordinates[indices]
+
+    def get_coordinates_by_e(self, e: Edge) -> Segment:
         i, j = e
         c1 = self.get_coordinate_by_v(i)
         c2 = self.get_coordinate_by_v(j)
@@ -167,14 +183,26 @@ class WallCenterLine(UndirectedGraph):
         self._p2v[j] = i
         self._update_v2i_i2v()
 
-    def _update_v2i_i2v(self):
-        self._v2i = dict(zip(self._adjacency_list.keys(), range(self._n)))
-        self._i2v = dict(zip(range(self._n), self._adjacency_list.keys()))
-
     def append_vertex_to_edge(self, v: Vertex, e: Edge):
         if v in e:
             return
         super(WallCenterLine, self).append_vertex_to_edge(v, e)
+
+        for room in self._rooms:
+            i = self._find_insertion_in_room(e, room)
+            if i is not None:
+                room.insert(i, v)
+
+    def _find_insertion_in_room(self, e: Edge, room: List[Vertex]):
+        n = len(room)
+        for i in range(n):
+            re1 = self._p2v[room[i % n]]
+            re2 = self._p2v[room[(i + 1) % n]]
+            if re1 == e[0] and re2 == e[1]:
+                return i + 1
+            if re1 == e[1] and re2 == e[0]:
+                return i + 1
+        return None
 
     def set_current_coordinates(self, array: np.ndarray):
         self._cur_coordinates = array
@@ -251,3 +279,4 @@ class WallCenterLineWithOpenPoints(WallCenterLine):
     def _add_edge_to_list(e: Edge, l: list):
         l.append(e)
         l.append(e[::-1])
+

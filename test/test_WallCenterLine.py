@@ -1,21 +1,20 @@
 import unittest
 
+import pickle
 import numpy as np
 from PIL import Image
 from matplotlib import pyplot as plt
 
 import segvec.main_steps.wall_center_line
+from entity.wall_center_line import WallCenterLine
+from segvec.utils import plot_wcl_against_target
+from segvec.geometry import find_boundaries
 
 
 class TestWallCenterOptimization(unittest.TestCase):
     def test_init_(self):
-        import pickle
-        from entity.wall_center_line import WallCenterLine
-        from segvec.utils import plot_wcl_against_target
-        from segvec.geometry import find_boundaries
-
         # get add_boundary
-        path = path = '../data/flat_0.png'
+        path = '../data/flat_0.png'
         self.img = Image.open(path)
         self.boundary = np.zeros(self.img.size[::-1], dtype=int)
         for cc in find_boundaries(self.img):
@@ -37,7 +36,11 @@ class TestWallCenterOptimization(unittest.TestCase):
 
         # construct a graph from contours
         self.wcl = WallCenterLine(self.contours)
-        plot_wcl_against_target(self.wcl, self.boundary + np.nan, title="initial state")
+        plot_wcl_against_target(self.wcl,
+                                self.boundary + np.nan,
+                                title="initial state"
+                                )
+        pass
 
     def test_k_neighbor(self):
         from sklearn.neighbors import kneighbors_graph
@@ -149,10 +152,13 @@ class TestWallCenterOptimization(unittest.TestCase):
         print("--------------------end--------------------")
 
         # serialization
-        # import pickle
-        # path = 'data/wcl.pickle'
-        # with open(path, 'wb') as f:
-        #     pickle.dump(self.wcl, f)
+        import pickle
+        path = '../data/wcl.pickle'
+        with open(path, 'wb') as f:
+            pickle.dump(self.wcl, f)
+
+        plt.imshow(self.boundary + np.nan)
+        plot_rooms_in_wcl(wcl=self.wcl, title="rooms in wall center lines", show=True)
 
     def interactive_merge_vertices(self, i, j):
         from segvec.utils import plot_wall_center_lines
@@ -176,3 +182,51 @@ class TestWallCenterLine(unittest.TestCase):
         self._init()
         self.wcl_o = WallCenterLineWithOpenPoints.from_wcl(self.wcl)
         pass
+
+    def test_rooms(self):
+        # get add_boundary
+        path = '../data/flat_0.png'
+        self.img = Image.open(path)
+        self.boundary = np.zeros(self.img.size[::-1], dtype=int)
+        for cc in find_boundaries(self.img):
+            self.boundary |= cc.array
+
+        plt.imshow(self.boundary, cmap='gray')
+        plt.show()
+
+        path = '../data/countours-1.pickle'
+        with open(path, 'rb') as f:
+            self.contours = pickle.load(f)
+
+        # plot all contours of rooms
+        # plt.imshow(np.array(self.img) + np.nan)
+        # for c in self.contours:
+        #     plt.plot(c.plot_x, c.plot_y)
+        # plt.show()
+        print('loaded contours from pickle file')
+
+        # construct a graph from contours
+        path = '../data/wcl.pickle'
+        with open(path, 'rb') as f:
+            self.wcl = pickle.load(f)
+        plot_wcl_against_target(self.wcl,
+                                self.boundary + np.nan,
+                                title="initial state"
+                                )
+
+        plt.imshow(self.boundary + np.nan)
+        plot_rooms_in_wcl(wcl=self.wcl, title="rooms in wall center lines", show=True)
+        pass
+
+
+#####################################################################
+# utils function for plotting
+def plot_rooms_in_wcl(wcl: WallCenterLine, title="", show=False):
+    for room in wcl.rooms:
+        indices = list(range(room.shape[0])) + [0]
+        plt.plot(room[indices, 0], room[indices, 1])
+    plt.title(title)
+    if show:
+        plt.show()
+
+

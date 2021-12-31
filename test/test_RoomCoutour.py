@@ -3,12 +3,13 @@ import unittest
 import numpy as np
 from PIL import Image
 from matplotlib import pyplot as plt
+import pickle
 
 
 class TestRoomContourOptimization(unittest.TestCase):
     def test_init(self):
         from segvec.geometry import find_rooms
-        path = path = 'data/flat_0.png'
+        path = '../data/flat_0.png'
         self.img = Image.open(path)
         rooms = find_rooms(self.img)
 
@@ -19,7 +20,7 @@ class TestRoomContourOptimization(unittest.TestCase):
 
         self.assertTrue(isinstance(self.rooms, list))
         print(f'{len(self.rooms)} rooms are found!')
-        # self.plot_rooms()
+        self.plot_rooms("the original rooms' contours")
 
     def test_vertices_reduction(self):
         from segvec.image_reader import BinaryImageFromFile
@@ -76,7 +77,7 @@ class TestRoomContourOptimization(unittest.TestCase):
             print(f"iter = {i + 1}, gradient = {plg.grad}, -log_iou = {-iou.detach().numpy()}")
 
     def test_alternating_optimization(self):
-        from segvec.utils import plot_polygon_comparing_cc, plot_contours
+        from segvec.utils import plot_polygon
         from segvec.entity.polygon import Polygon
         self.test_init()
         opt_contours = []
@@ -90,11 +91,16 @@ class TestRoomContourOptimization(unittest.TestCase):
             print(f'the {i+1}th room has been optimized')
         ######################################
         # pickle the contours
-        # pickle = importlib.import_module('pickle')
-        # path = 'data/countours-1.pickle'
+        # path = '../data/countours-1.pickle'
         # with open(path, 'wb') as f:
         #     pickle.dump(opt_contours, f)
+
         print('--- end ---')
+
+        # plt.imshow(self.rooms[0].array + np.nan)
+        # for plg in opt_contours:
+        #     plot_polygon(plg, show=False)
+        # plt.show()
 
     @staticmethod
     def alternating_optimizing(cc):
@@ -121,8 +127,9 @@ class TestRoomContourOptimization(unittest.TestCase):
         del reducer
         return plg
 
-    def plot_rooms(self):
+    def plot_rooms(self, title=""):
         plt.imshow(self.rooms[0].array + np.nan)
         for cc in self.rooms:
             plt.plot(cc.boundary[..., 0], cc.boundary[..., 1])
+        plt.title(title)
         plt.show()

@@ -32,7 +32,7 @@ WallCenterLineWithOpenPoints = entity.wall_center_line.WallCenterLineWithOpenPoi
 
 
 Coordinate2D = Point = Union[Tuple[float, float], np.ndarray]
-Segment = Tuple[Point, Point]
+Segment = Union[Tuple[Point, Point], np.ndarray]
 Radius = float
 Length = float
 Vector2D = Tuple[float, float]
