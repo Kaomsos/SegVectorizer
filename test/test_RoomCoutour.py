@@ -42,10 +42,10 @@ class TestRoomContourOptimization(unittest.TestCase):
         from segvec.image_reader import BinaryImageFromFile
         import torch
         from torch.optim import RMSprop
-        from segvec.softras.objective import orthogonal
-        from segvec.softras.objective import boundary
-        from segvec.softras.objective import log_iou
-        from segvec.softras.rasterizer import Base2DPolygonRasterizer
+        from segvec.optimize.objective import orthogonal
+        from segvec.optimize.objective import boundary
+        from segvec.optimize.objective import log_iou
+        from segvec.optimize.rasterizer import Base2DPolygonRasterizer
 
         path = "data/rect1.jpg"
         self.sigma = 10

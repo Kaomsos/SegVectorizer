@@ -10,8 +10,8 @@ import torch
 from torch.optim import RMSprop
 
 from ..entity.polygon import Polygon
-from ..softras.objective import log_iou, boundary, orthogonal
-from ..softras.rasterizer import Base2DPolygonRasterizer as SoftRasterizer
+from ..optimize.objective import log_iou, boundary, orthogonal
+from ..optimize.rasterizer import Base2DPolygonRasterizer as SoftRasterizer
 
 
 class PolygonVertexIterator:

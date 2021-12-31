@@ -11,7 +11,7 @@ from torch.optim import RMSprop
 
 from ..entity.mapping import SemiIdentityMapping
 from ..geometry import distance_p_to_segments
-from ..softras.objective import center, nearby, alignment
+from ..optimize.objective import center, nearby, alignment
 
 
 class VertexReducer:

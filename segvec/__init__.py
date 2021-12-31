@@ -1,6 +1,6 @@
 from . import entity
 from . import main_steps
-from . import softras
+from . import optimize
 from . import geometry
 from . import image_reader
 from . import func

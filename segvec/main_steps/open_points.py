@@ -11,12 +11,12 @@ import torch
 from sklearn.decomposition import PCA
 from torch.optim import RMSprop
 
-from ..softras import objective
+from ..optimize import objective
 from entity.wall_center_line import WallCenterLineWithOpenPoints as WCL_O
 from ..entity.polygon import Rectangle
 from ..geometry import distance_seg_to_segments, project_seg_to_seg
-from ..softras.objective import log_iou
-from ..softras.rasterizer import FixedCenterRectangle2DRasterizer as RectangleRasterizer
+from ..optimize.objective import log_iou
+from ..optimize.rasterizer import FixedCenterRectangle2DRasterizer as RectangleRasterizer
 
 
 ###########################################
