@@ -94,8 +94,8 @@ class WallCenterLine(UndirectedGraph):
     def segments_matrix(self) -> Tuple[np.ndarray, np.ndarray]:
         # return a matrix S(e, v) and E(e, v)
         # such that given current coordinates array P(v, 2)
-        # S(E, V) @ P(v, 2) will return an array of all current start point coordinates, and
-        # E(E, V) @ P(v, 2) will return an array end point coordinates
+        # S(E, V) @ P(v, 2) will return an array of all current start points coordinates, and
+        # E(E, V) @ P(v, 2) will return an array end points coordinates
 
         edges = self.edges
 

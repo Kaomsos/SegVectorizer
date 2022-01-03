@@ -8,8 +8,8 @@ from matplotlib import pyplot as plt
 import segvec.main_steps.wall_center_line
 from entity.wall_center_line import WallCenterLine
 from segvec.utils import plot_wcl_against_target
-from segvec.geometry import find_boundaries, rasterize_polygon, find_connected_components
-from segvec.main_steps.room_type import count_pixels_in_region
+from segvec.geometry import find_boundaries, rasterize_polygon, find_connected_components, get_bounding_box
+from segvec.main_steps.room_type import count_pixels_in_region, refine_room_types
 
 
 class TestWallCenterOptimization(unittest.TestCase):
@@ -239,14 +239,14 @@ class TestWallCenterLine(unittest.TestCase):
         for i, room in enumerate(self.wcl.rooms):
             mask = rasterize_polygon(img_shape, room)
             ras = np.where(mask, i + 1, 0)
-            counts = count_pixels_in_region(self.img, mask=mask)
-
             img += ras
-            pass
 
         plt.imshow(img, cmap='tab20', interpolation='none')
         plt.colorbar()
         plt.show()
+
+        room_types = refine_room_types(wcl=self.wcl, segmentation=self.img, boundary=(5, 6, 7), background=(0,))
+        pass
 
 
 #####################################################################
@@ -254,8 +254,10 @@ class TestWallCenterLine(unittest.TestCase):
 def plot_rooms_in_wcl(wcl: WallCenterLine, title="", show=False):
     for i, room in enumerate(wcl.rooms):
         indices = list(range(room.shape[0])) + [0]
+        p1, p2 = get_bounding_box(room)
+        x, y = (p1 + p2) / 2
         plt.plot(room[indices, 0], room[indices, 1])
-        plt.text(room[indices, 0].mean(), room[indices, 1].mean(), f'{i+1}th room', size='x-small')
+        plt.text(x, y, f'{i+1}th \nroom', size='x-small', ha='center', va='center')
     plt.title(title)
     if show:
         plt.show()

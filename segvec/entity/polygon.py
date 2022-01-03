@@ -31,7 +31,7 @@ class Polygon:
             vertices_ = approximate_polygon(connected_component.boundary, tolerance=self._tol)
 
         elif arr is not None:
-            contours = find_contours(arr)    # delete the last point
+            contours = find_contours(arr)    # delete the last points
             assert len(contours) <= 1, 'more than one connected target are detected'
             assert len(contours) > 0, 'no connected target is detected'
             vertices_ = approximate_polygon(contours[0], tolerance=self._tol)
@@ -56,7 +56,7 @@ class Polygon:
     def set_vertices(self, vertices: np.ndarray):
         assert len(vertices) > 0, 'empty array'
         assert len(vertices.shape) == 2, 'not a 2d array'
-        assert vertices.shape[1] == 2, 'not a array of 2d point'
+        assert vertices.shape[1] == 2, 'not a array of 2d points'
 
         # constraints that self._vertices are "closed"
         # IMPROVE: replace indexing implementation

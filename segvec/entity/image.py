@@ -99,7 +99,7 @@ class SingleConnectedComponent(BinaryImage):
     def filter_contours(contours: List[np.array], threshold: float = 10):
         # solving the problem of circular import
         mod = importlib.import_module("segvec.geometry")
-        get_bounding_box = getattr(mod, 'get_bounding_box')
+        get_bounding_box = getattr(mod, 'get_bounding_box_t')
 
         # define an inner function
         def is_trivial(contour):

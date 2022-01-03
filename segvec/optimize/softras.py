@@ -6,7 +6,7 @@ import torch
 from numpy.typing import ArrayLike
 from torch import nn, Tensor
 
-from ..geometry import intersection_given_x_plg, distance_p_to_plg, get_segments, get_bounding_box
+from ..geometry import intersection_given_x_plg, distance_p_to_plg, get_segments, get_bounding_box_t
 
 
 class Rasterizer(ABC):
@@ -114,7 +114,7 @@ class Base2DPolygonRasterizer(Rasterizer, nn.Module):
 
     @staticmethod
     def get_bounding_box(points: Tensor) -> Tuple[Tensor, Tensor]:
-        return get_bounding_box(points)
+        return get_bounding_box_t(points)
 
     def update_xy_lim(self, polygon):
         lt, rb = self.get_bounding_box(polygon)

@@ -176,9 +176,15 @@ def intersection_given_x_plg(x, polygon):
     return sorted(filter(lambda v: v is not None, ys), reverse=True)
 
 
-def get_bounding_box(points: Tensor) -> Tuple[Tensor, Tensor]:
+def get_bounding_box_t(points: Tensor) -> Tuple[Tensor, Tensor]:
     p1 = torch.amin(points, dim=0)
     p2 = torch.amax(points, dim=0)
+    return p1, p2
+
+
+def get_bounding_box(points: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    p1 = points.max(axis=0)
+    p2 = points.min(axis=0)
     return p1, p2
 
 
@@ -258,10 +264,10 @@ def find_boundaries(img, threshold=0) -> List[SingleConnectedComponent]:
     return boundaries
 
 
-def rasterize_polygon(image_shape: Tuple[int, int],
+def rasterize_polygon(arr_shape: Tuple[int, int],
                       polygon: np.ndarray
                       ) -> np.ndarray:
     polygon = polygon[..., [1, 0]]
-    mask = polygon2mask(image_shape, polygon)
+    mask = polygon2mask(arr_shape, polygon)
     return mask
 
