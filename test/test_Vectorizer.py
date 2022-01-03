@@ -8,9 +8,10 @@ if TYPE_CHECKING:
 import unittest
 from PIL import Image
 import pickle
-
 import numpy as np
+
 from segvec import convert_a_segmentation, PaletteConfiguration
+from test_WallCenterLine import plot_rooms_in_wcl
 
 
 class TestVectorizer(unittest.TestCase):
@@ -128,7 +129,7 @@ class TestVectorizer(unittest.TestCase):
         with open("../data/seg_reduced.pickle", 'rb') as f:
             seg = pickle.load(f)
         p = {
-            '厨房': 0,
+            '厨房': -1,
             '阳台': 1,
             '卫生间': 2,
             '卧室': 3,
@@ -170,4 +171,12 @@ class TestVectorizer(unittest.TestCase):
 
         plt.imshow(seg, cmap='tab20', interpolation='none')
         plt.show()
-        convert_a_segmentation(seg, p_config)
+
+        wcl = convert_a_segmentation(seg, p_config)
+
+        plt.imshow(seg + np.nan)
+        plot_rooms_in_wcl(wcl, show=True)
+
+        path = '../data/wcl_mpmw.pickle'
+        with open(path, 'wb') as f:
+            pickle.dump(wcl, f)

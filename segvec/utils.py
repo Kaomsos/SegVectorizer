@@ -24,6 +24,7 @@ __all__ = ["plot_binary_image",
            'plot_position_of_rects',
            'plot_wcl_o_against_target',
            'palette',
+           'plt',
            ]
 
 

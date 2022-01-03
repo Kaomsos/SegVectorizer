@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 import segvec.main_steps.wall_center_line
 from entity.wall_center_line import WallCenterLine
 from segvec.utils import plot_wcl_against_target
-from segvec.geometry import find_boundaries, rasterize_polygon
+from segvec.geometry import find_boundaries, rasterize_polygon, find_connected_components
 from segvec.main_steps.room_type import count_pixels_in_region
 
 
@@ -180,7 +180,7 @@ class TestWallCenterLine(unittest.TestCase):
         if show:
             plot_wcl_against_target(self.wcl,
                                     self.boundary + np.nan,
-                                    title="initial state"
+                                    title="optimized wall center lines"
                                     )
 
             plt.imshow(self.boundary + np.nan)
@@ -195,6 +195,27 @@ class TestWallCenterLine(unittest.TestCase):
             plt.imshow(self.boundary, cmap='gray')
             plt.show()
 
+    def _init_matrix(self, path='../data/seg_reduced.pickle', show=True):
+        with open(path, 'rb') as f:
+            self.img = pickle.load(f)
+
+        boundaries = []
+        for c in [5, 6, 7]:
+            boundaries += find_connected_components(self.img, c)
+
+        self.boundary = np.zeros_like(self.img, dtype=int)
+        for cc in boundaries:
+            self.boundary |= cc.array
+
+        if show:
+            plt.imshow(self.img, cmap='tab20', interpolation='none')
+            plt.title('segmentation')
+            plt.colorbar()
+            plt.show()
+            plt.imshow(self.boundary, cmap='gray')
+            plt.title('boundary')
+            plt.show()
+
     def test_wcl_with_open(self):
         from entity.wall_center_line import WallCenterLineWithOpenPoints
         self._init_wcl()
@@ -203,11 +224,14 @@ class TestWallCenterLine(unittest.TestCase):
 
     def test_room_type(self):
         # get add_boundary
-        path = '../data/flat_0.png'
-        self._init_img(path)
+        # path = '../data/flat_0.png'
+        # self._init_img(path)
+
+        path = '../data/seg_reduced.pickle'
+        self._init_matrix(path)
 
         # construct a graph from contours
-        path = '../data/wcl.pickle'
+        path = '../data/wcl_mpmw.pickle'
         self._init_wcl(path)
 
         img_shape = self.boundary.shape
@@ -215,7 +239,7 @@ class TestWallCenterLine(unittest.TestCase):
         for i, room in enumerate(self.wcl.rooms):
             mask = rasterize_polygon(img_shape, room)
             ras = np.where(mask, i + 1, 0)
-            count_pixels_in_region(self.img)
+            counts = count_pixels_in_region(self.img, mask=mask)
 
             img += ras
             pass
@@ -228,9 +252,10 @@ class TestWallCenterLine(unittest.TestCase):
 #####################################################################
 # utils function for plotting
 def plot_rooms_in_wcl(wcl: WallCenterLine, title="", show=False):
-    for room in wcl.rooms:
+    for i, room in enumerate(wcl.rooms):
         indices = list(range(room.shape[0])) + [0]
         plt.plot(room[indices, 0], room[indices, 1])
+        plt.text(room[indices, 0].mean(), room[indices, 1].mean(), f'{i+1}th room', size='x-small')
     plt.title(title)
     if show:
         plt.show()

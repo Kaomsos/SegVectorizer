@@ -10,7 +10,15 @@ def count_pixels_in_region(segmentation: np.ndarray,
                            mask: np.ndarray = None
                            ) -> Dict[int, int]:
     if mask is not None:
-        segmentation = segmentation[mask]
+        assert segmentation.ndim == mask.ndim
+        for x, y in zip(segmentation.shape, mask.shape):
+            assert x == y
 
-    pass
+        segmentation = segmentation[mask]
+    else:
+        segmentation = segmentation.flatten()
+
+    uniq, cnt = np.unique(segmentation, return_counts=True)
+    return dict(zip(uniq.tolist(), cnt.tolist()))
+
 
