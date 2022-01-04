@@ -10,7 +10,11 @@ from PIL import Image
 import pickle
 import numpy as np
 
-from segvec import convert_a_segmentation, PaletteConfiguration
+from segvec import convert_a_segmentation, Vectorizer, PaletteConfiguration
+from segvec.utils import plot_wcl_against_target, plot_position_of_rects, plot_wcl_o_against_target, plot_binary_image
+from segvec.utils import palette
+from segvec.entity.image import SingleConnectedComponent
+
 from test_WallCenterLine import plot_rooms_in_wcl
 
 
@@ -46,13 +50,11 @@ class TestVectorizer(unittest.TestCase):
         self.vectorizer = Vectorizer(palette_config=p_config)
 
     def test_vectorizer_get_components(self):
-        from segvec.entity.image import SingleConnectedComponent
-
         self._init(path='../data/flat_1.png')
 
         segmentation = np.array(self.img)
 
-        c1, c2, c3 = self.vectorizer._extract_connected_components(segmentation)
+        c1, c2, c3 = self.vectorizer.extract_connected_components(segmentation)
         self.assertTrue(isinstance(c2, np.ndarray))
         for ccs in [c1, c3]:
             self.assertTrue(isinstance(ccs, list))
@@ -66,7 +68,7 @@ class TestVectorizer(unittest.TestCase):
 
         segmentation = np.array(self.img)
 
-        opens, boundary, rooms = self.vectorizer._extract_connected_components(segmentation)
+        opens, boundary, rooms = self.vectorizer.extract_connected_components(segmentation)
 
         contours = [self.vectorizer._get_room_contour(cc) for cc in rooms]
 
@@ -77,16 +79,12 @@ class TestVectorizer(unittest.TestCase):
         for c in contours:
             self.assertTrue(isinstance(c, Contour))
 
-        wcl = self.vectorizer._get_wall_center_line(contours, boundary)
+        wcl = self.vectorizer.get_wall_center_line(contours, boundary)
         self.assertTrue(isinstance(wcl, WallCenterLine))
 
         pass
 
     def test_vectorize(self):
-        from segvec.utils import plot_wcl_against_target, plot_position_of_rects, plot_wcl_o_against_target
-        from segvec import Vectorizer, PaletteConfiguration
-        from segvec.utils import palette
-
         path = '../data/Figure_47541863.png'
         self.img = Image.open(path)
         self.segmentation = np.array(self.img)
@@ -116,8 +114,6 @@ class TestVectorizer(unittest.TestCase):
         plt.show()
 
     def plot_cc_against_image(self, ccs: List[SingleConnectedComponent]):
-        from segvec.utils import plot_binary_image
-
         bin_arr = np.zeros(self.img.size[::-1], dtype=int)
 
         for c in ccs:
@@ -172,11 +168,27 @@ class TestVectorizer(unittest.TestCase):
         plt.imshow(seg, cmap='tab20', interpolation='none')
         plt.show()
 
-        wcl = convert_a_segmentation(seg, p_config)
+        vec = Vectorizer(palette_config=p_config)
+        open_cc, boundary_cc, room_cc = vec.extract_connected_components(seg)
+        rects = vec.get_rectangles(open_cc)
+
+        vec.set_hyper_parameters_by_rectangles(rects)
+
+        # room contour optimization
+        room_contours = vec.get_room_contours(room_cc)
+
+        # wall center line optimization
+        wcl = vec.get_wall_center_line(room_contours, boundary_cc)
+
+        # open points extraction
+        wcl_o = vec.insert_open_points_in_wcl(rects, wcl)
+
+        # room type refinement
+        wcl_o.room_types = vec.get_room_type(wcl_o, seg)
 
         plt.imshow(seg + np.nan)
-        plot_rooms_in_wcl(wcl, show=True)
+        plot_rooms_in_wcl(wcl_o, p_config, show=True)
 
-        path = '../data/wcl_mpmw.pickle'
-        with open(path, 'wb') as f:
-            pickle.dump(wcl, f)
+        # path = '../data/wcl_mpmw.pickle'
+        # with open(path, 'wb') as f:
+        #     pickle.dump(wcl, f)

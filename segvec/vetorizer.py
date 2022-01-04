@@ -15,6 +15,7 @@ from .geometry import find_connected_components
 from .main_steps.room_contour import alternating_optimize as fit_room_contour
 from .main_steps.wall_center_line import alternating_optimize as fit_wall_center_line
 from .main_steps.open_points import fit_open_points, insert_open_points_in_wcl
+from .main_steps.room_type import refine_room_types
 
 
 class PaletteConfiguration(UserDict):
@@ -159,18 +160,22 @@ class Vectorizer:
 
     def _vectorize(self, segmentation) -> WallCenterLineWithOpenPoints:
         # init and get hyper_parameters
-        open_cc, boundary_cc, room_cc = self._extract_connected_components(segmentation)
-        rects: List[Rectangle] = [self._get_rectangle(o) for o in open_cc]
+        open_cc, boundary_cc, room_cc = self.extract_connected_components(segmentation)
+        rects: List[Rectangle] = self.get_rectangles(open_cc)
 
-        self._set_hyper_parameters_by_rectangles(rects)
+        self.set_hyper_parameters_by_rectangles(rects)
 
         # room contour optimization
-        room_contours: List[Contour] = [self._get_room_contour(cc) for cc in room_cc]
+        room_contours: List[Contour] = self.get_room_contours(room_cc)
 
         # wall center line optimization
-        wcl = self._get_wall_center_line(room_contours, boundary_cc)
+        wcl = self.get_wall_center_line(room_contours, boundary_cc)
 
-        wcl_o = insert_open_points_in_wcl(rects, wcl)
+        # open points extraction
+        wcl_o = self.insert_open_points_in_wcl(opens=rects, wcl=wcl)
+
+        # room type refinement
+        wcl_o.room_types = self.get_room_type(wcl_o, segmentation)
 
         self.rects = rects
         self.boundary = boundary_cc
@@ -178,7 +183,7 @@ class Vectorizer:
 
         return wcl_o
 
-    def _extract_connected_components(self, segmentation):
+    def extract_connected_components(self, segmentation):
         window_cc: List[SingleConnectedComponent] = []
         for c in self._window_colors:
             window_cc += find_connected_components(segmentation, c, threshold=self._boundary_threshold, tag="window")
@@ -217,7 +222,10 @@ class Vectorizer:
         rect.tag = open_.tag
         return rect
 
-    def _set_hyper_parameters_by_rectangles(self, rects: List[Rectangle]) -> None:
+    def get_rectangles(self, opens: List[SingleConnectedComponent]) -> List[Rectangle]:
+        return [self._get_rectangle(o) for o in opens]
+
+    def set_hyper_parameters_by_rectangles(self, rects: List[Rectangle]) -> None:
         wall_width = np.array([(rect.w, rect.h) for rect in rects]).min(axis=-1).mean()
         self._delta_a = wall_width * 1.5
         self._delta_x = wall_width * 1.5
@@ -232,7 +240,10 @@ class Vectorizer:
                                    )
         return contour
 
-    def _get_wall_center_line(self, contours: List[Contour], boundary: np.ndarray) -> WallCenterLine:
+    def get_room_contours(self, rooms: List[SingleConnectedComponent]) -> List[Contour]:
+        return [self._get_room_contour(cc) for cc in rooms]
+
+    def get_wall_center_line(self, contours: List[Contour], boundary: np.ndarray) -> WallCenterLine:
         wcl_new = fit_wall_center_line(WallCenterLine(contours),
                                        delta_x=self._delta_x,
                                        delta_y=self._delta_y,
@@ -242,3 +253,15 @@ class Vectorizer:
                                        max_coord_iter=self._max_iter_wcl_coord_opt,
                                        )
         return wcl_new
+
+    @staticmethod
+    def insert_open_points_in_wcl(opens: List[Rectangle], wcl: WallCenterLine) -> WallCenterLineWithOpenPoints:
+        return insert_open_points_in_wcl(opens, wcl)
+
+    def get_room_type(self, wcl: WallCenterLine, segmentation: np.ndarray):
+        room_types = refine_room_types(wcl,
+                                       segmentation,
+                                       boundary=self._boundary_colors,
+                                       background=(),
+                                       )
+        return room_types

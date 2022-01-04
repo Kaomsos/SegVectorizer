@@ -60,6 +60,7 @@ def refine_room_types(wcl: WallCenterLine,
     for room in wcl.rooms:
         mask = rasterize_polygon(arr_shape=segmentation.shape, polygon=room)
         counts = count_pixels_in_region(segmentation, mask)
+        # filter trivial and non-room contours
         if is_trivial(counts, trivial_threshold):
             room_types.append(None)
         elif is_non_room(counts, non_room_threshold, non_room=boundary | background):

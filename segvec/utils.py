@@ -124,9 +124,13 @@ def plot_position_of_rects(l: List[Rectangle], color="#3399ff", show=False):
 def plot_wcl_o_against_target(wcl_o: WallCenterLineWithOpenPoints, target: np.ndarray, title='', show=True):
     plot_wcl_against_target(wcl_o, target, title=title, show=False)
 
-    for e in wcl_o._open_edge:
-        p1, p2 = wcl_o.get_coordinates_by_e(e)
+    for e in wcl_o.windows:
+        p1, p2 = e
         plt.plot([p1[0], p2[0]], [p1[1], p2[1]], color='red')
+
+    for e in wcl_o.doors:
+        p1, p2 = e
+        plt.plot([p1[0], p2[0]], [p1[1], p2[1]], color='lime')
 
     if show:
         plt.show()

@@ -293,7 +293,7 @@ class TestOpenPointExtraction(unittest.TestCase):
 
         self._init(path='../data/flat_0.png')
         segmentation = np.array(self.img)
-        opens, boundary, rooms = self.vectorizer._extract_connected_components(segmentation)
+        opens, boundary, rooms = self.vectorizer.extract_connected_components(segmentation)
         rects = [self.vectorizer._get_rectangle(o) for o in opens]
 
         with open("../data/wcl-1.pickle", 'rb') as f:

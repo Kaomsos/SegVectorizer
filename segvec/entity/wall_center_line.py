@@ -38,7 +38,11 @@ class WallCenterLine(UndirectedGraph):
         super(WallCenterLine, self).__init__(num_vertices, edges)
 
         self._init_n = num_vertices
+
+        # rooms and room_types
         self._rooms: List[List[Vertex]] = rooms
+        self._room_types = None
+
         # Gathering 2d coordinates as a big array
         coordinates = np.concatenate(coordinates, axis=0)
         self._init_coordinates = coordinates
@@ -151,6 +155,14 @@ class WallCenterLine(UndirectedGraph):
         coord = [self._get_coordinates_by_ps(ps) for ps in self._rooms]
         return coord
 
+    @property
+    def room_types(self) -> List[int]:
+        return self._room_types
+
+    @room_types.setter
+    def room_types(self, val: List[int]):
+        self._room_types = val
+
     def get_coordinate_by_v(self, v: Vertex) -> Coordinate2D:
         i = self._v2i[v]
         return self._cur_coordinates[i]
@@ -213,6 +225,18 @@ class WallCenterLineWithOpenPoints(WallCenterLine):
         self._open_edge = []
         self._door_edge = []
         self._window_edge = []
+
+    @property
+    def opens(self) -> List[np.ndarray]:
+        return [np.stack(self.get_coordinates_by_e(e)) for e in self._open_edge]
+
+    @property
+    def doors(self) -> List[np.ndarray]:
+        return [np.stack(self.get_coordinates_by_e(e)) for e in self._door_edge]
+
+    @property
+    def windows(self) -> List[np.ndarray]:
+        return [np.stack(self.get_coordinates_by_e(e)) for e in self._window_edge]
 
     @classmethod
     def from_wcl(cls, wcl: WallCenterLine):
