@@ -9,8 +9,7 @@ from torch import Tensor
 from skimage.measure import label
 from skimage.draw import polygon2mask
 
-from .entity.image import SingleConnectedComponent
-from .utils import palette
+from segvec.entity.image import SingleConnectedComponent
 
 EPSILON = 1e-2
 

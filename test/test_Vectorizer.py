@@ -11,11 +11,15 @@ import pickle
 import numpy as np
 
 from segvec import convert_a_segmentation, Vectorizer, PaletteConfiguration
-from segvec.utils import plot_wcl_against_target, plot_position_of_rects, plot_wcl_o_against_target, plot_binary_image
+from segvec.utils import (plot_wcl_against_target,
+                          plot_position_of_rects,
+                          plot_room_contours,
+                          plot_wcl_o_against_target,
+                          plot_binary_image,
+                          plot_empty_image_like,
+                          plot_rooms_in_wcl)
 from segvec.utils import palette
 from segvec.entity.image import SingleConnectedComponent
-
-from test_WallCenterLine import plot_rooms_in_wcl
 
 
 class TestVectorizer(unittest.TestCase):
@@ -166,28 +170,54 @@ class TestVectorizer(unittest.TestCase):
                                         )
 
         plt.imshow(seg, cmap='tab20', interpolation='none')
+        plt.title("original segmentation")
         plt.show()
 
         vec = Vectorizer(palette_config=p_config)
+
+        ##############################################
+        # vectorization
+        ##############################################
+        # Init
         open_cc, boundary_cc, room_cc = vec.extract_connected_components(seg)
         rects = vec.get_rectangles(open_cc)
+
+        plot_empty_image_like(seg)
+        plot_position_of_rects(filter(lambda x: x.tag == 'door', rects), color='lime')
+        plot_position_of_rects(filter(lambda x: x.tag == 'window', rects), color='red')
+        plt.title("position of open points")
+        plt.show()
 
         vec.set_hyper_parameters_by_rectangles(rects)
 
         # room contour optimization
         room_contours = vec.get_room_contours(room_cc)
 
+        plot_empty_image_like(seg)
+        plot_room_contours(room_contours)
+        plt.title("room contours")
+        plt.show()
+
         # wall center line optimization
         wcl = vec.get_wall_center_line(room_contours, boundary_cc)
+
+        plot_wcl_against_target(wcl, boundary_cc, 'wall center line', show=True)
 
         # open points extraction
         wcl_o = vec.insert_open_points_in_wcl(rects, wcl)
 
+        plot_wcl_o_against_target(wcl_o, boundary_cc, 'wall center line with open points', annotation=False, show=True)
+
         # room type refinement
         wcl_o.room_types = vec.get_room_type(wcl_o, seg)
 
-        plt.imshow(seg + np.nan)
-        plot_rooms_in_wcl(wcl_o, p_config, show=True)
+        plot_empty_image_like(seg)
+        plot_rooms_in_wcl(wcl_o, p_config, title="show room types", show=True)
+
+        # put everything together
+        plot_empty_image_like(seg)
+        plot_wcl_o_against_target(wcl_o, title='', annotation=False, show=False)
+        plot_rooms_in_wcl(wcl_o, p_config, title="show room types", contour=False, show=True)
 
         # path = '../data/wcl_mpmw.pickle'
         # with open(path, 'wb') as f:

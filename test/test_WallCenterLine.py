@@ -8,8 +8,9 @@ from matplotlib import pyplot as plt
 import segvec.main_steps.wall_center_line
 from entity.wall_center_line import WallCenterLine
 from segvec.utils import plot_wcl_against_target
-from segvec.geometry import find_boundaries, rasterize_polygon, find_connected_components, get_bounding_box
-from segvec.main_steps.room_type import count_pixels_in_region, refine_room_types
+from segvec.geometry import find_boundaries, rasterize_polygon, find_connected_components
+from segvec.main_steps.room_type import refine_room_types
+from utils import plot_rooms_in_wcl
 
 
 class TestWallCenterOptimization(unittest.TestCase):
@@ -251,27 +252,5 @@ class TestWallCenterLine(unittest.TestCase):
 
 #####################################################################
 # utils function for plotting
-def plot_rooms_in_wcl(wcl: WallCenterLine,
-                      palette: dict = None,
-                      title: str = "",
-                      show: bool = False
-                      ):
-    plt.rcParams['font.sans-serif'] = ['SimHei']
-    reverse_palette = {v: k for k, v in palette.items()}
-    for room, type_ in zip(wcl.rooms, wcl.room_types):
-        indices = list(range(room.shape[0])) + [0]
-        p1, p2 = get_bounding_box(room)
-        x, y = (p1 + p2) / 2
-
-        if palette is None:
-            text = f'type {type_}'
-        else:
-            text = reverse_palette[type_]
-
-        plt.plot(room[indices, 0], room[indices, 1])
-        plt.text(x, y, text, size='x-small', ha='center', va='center')
-    plt.title(title)
-    if show:
-        plt.show()
 
 

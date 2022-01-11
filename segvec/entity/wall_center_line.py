@@ -4,9 +4,9 @@ from typing import TYPE_CHECKING, List, Tuple, Dict
 import numpy as np
 from scipy.sparse import csr_matrix
 
-from entity.graph import UndirectedGraph
-from entity.mapping import SemiIdentityMapping
-from entity.polygon import Polygon
+from .graph import UndirectedGraph
+from .mapping import SemiIdentityMapping
+from .polygon import Polygon
 
 if TYPE_CHECKING:
     from typing_ import Vertex, Edge, Coordinate2D, Segment

@@ -1,23 +1,28 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, List
+
 if TYPE_CHECKING:
-    from typing_ import WallCenterLine, Polygon, Rectangle, WallCenterLineWithOpenPoints
+    from typing_ import WallCenterLine, Polygon, Rectangle, WallCenterLineWithOpenPoints, Contour
 import warnings
 import numpy as np
 import torch
 from matplotlib import pyplot as plt
 from torchviz import make_dot
 
-from entity.wall_center_line import WallCenterLine
-from .entity.image import BinaryImage
-from .entity.polygon import Polygon
-
+from segvec.entity.wall_center_line import WallCenterLine
+from segvec.entity.image import BinaryImage
+from segvec.entity.polygon import Polygon
+from segvec.geometry import get_bounding_box
 
 __all__ = ["plot_binary_image",
            "plot_labeled_image",
+           "plot_empty_image",
+           "plot_empty_image_like",
            "plot_contours",
            'plot_polygon_comparing_cc',
            'plot_polygon',
+           'plot_room_contours',
+           'plot_rooms_in_wcl',
            'plot_wall_center_lines',
            'plot_wcl_against_target',
            'viz_computation_graph',
@@ -38,6 +43,18 @@ def plot_binary_image(bin_arr, title="", show=True):
 def plot_labeled_image(bin_arr):
     plt.imshow(bin_arr, cmap='nipy_spectral')
     plt.show()
+
+
+def plot_empty_image(arr_shape, show=False):
+    plt.imshow(np.empty(shape=arr_shape) + np.nan)
+    if show:
+        plt.show()
+
+
+def plot_empty_image_like(arr, show=False):
+    plt.imshow(np.empty(shape=arr.shape) + np.nan)
+    if show:
+        plt.show()
 
 
 def plot_contours(connected_component, show=True):
@@ -71,6 +88,13 @@ def plot_polygon(plg: Polygon, show=False):
         plt.show()
 
 
+def plot_room_contours(contours: List[Contour], show=False):
+    for c in contours:
+        plot_polygon(c, show=False)
+    if show:
+        plt.show()
+
+
 def plot_wall_center_lines(wcl: WallCenterLine, annotation=True, title: str = "", show=True):
     sps, eps = wcl.segments_collection
     for sp, ep in zip(sps, eps):
@@ -89,9 +113,10 @@ def plot_wall_center_lines(wcl: WallCenterLine, annotation=True, title: str = ""
         plt.show()
 
 
-def plot_wcl_against_target(wcl, target, title='', show=True):
-    plt.imshow(1 - target, cmap='gray')
-    plot_wall_center_lines(wcl, title=title, show=False)
+def plot_wcl_against_target(wcl, target=None, title='', annotation=True, show=True):
+    if target is not None:
+        plt.imshow(1 - target, cmap='gray')
+    plot_wall_center_lines(wcl, title=title, annotation=annotation, show=False)
     if show:
         plt.show()
 
@@ -121,8 +146,12 @@ def plot_position_of_rects(l: List[Rectangle], color="#3399ff", show=False):
         plt.show()
 
 
-def plot_wcl_o_against_target(wcl_o: WallCenterLineWithOpenPoints, target: np.ndarray, title='', show=True):
-    plot_wcl_against_target(wcl_o, target, title=title, show=False)
+def plot_wcl_o_against_target(wcl_o: WallCenterLineWithOpenPoints,
+                              target: np.ndarray = None ,
+                              title='',
+                              annotation=True,
+                              show=True):
+    plot_wcl_against_target(wcl_o, target, title=title, annotation=annotation, show=False)
 
     for e in wcl_o.windows:
         p1, p2 = e
@@ -131,6 +160,36 @@ def plot_wcl_o_against_target(wcl_o: WallCenterLineWithOpenPoints, target: np.nd
     for e in wcl_o.doors:
         p1, p2 = e
         plt.plot([p1[0], p2[0]], [p1[1], p2[1]], color='lime')
+
+    if show:
+        plt.show()
+
+
+def plot_rooms_in_wcl(wcl: WallCenterLine,
+                      palette: dict = None,
+                      title: str = "",
+                      contour: bool = True,
+                      show: bool = False
+                      ):
+    plt.rcParams['font.sans-serif'] = ['SimHei']
+    reverse_palette = {v: k for k, v in palette.items()}
+
+    for room, type_ in zip(wcl.rooms, wcl.room_types):
+        indices = list(range(room.shape[0])) + [0]
+        p1, p2 = get_bounding_box(room)
+        x, y = (p1 + p2) / 2
+
+        if palette is None:
+            text = f'type {type_}'
+        else:
+            text = reverse_palette[type_]
+
+        if contour:
+            plt.plot(room[indices, 0], room[indices, 1])
+
+        plt.text(x, y, text, size='x-small', ha='center', va='center')
+
+    plt.title(title)
 
     if show:
         plt.show()

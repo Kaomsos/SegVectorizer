@@ -3,7 +3,7 @@ from typing import Tuple, List, Dict, TypeVar, Generic, Union
 from collections.abc import Collection
 import numpy as np
 
-import entity.wall_center_line
+import segvec.entity.wall_center_line
 from . import entity
 
 
