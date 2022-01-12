@@ -57,8 +57,8 @@ class TestOpenPointExtraction(unittest.TestCase):
             print(rect)
 
         # import pickle
-        # path = 'data/door_window.pickle'
-        # with open(path, 'wb') as f:
+        # wclo_path = 'data/door_window.pickle'
+        # with open(wclo_path, 'wb') as f:
         #     pickle.dump(l, f)
 
     def test_rect_process(self):
@@ -109,9 +109,9 @@ class TestOpenPointExtraction(unittest.TestCase):
         plt.show()
 
         # save ends
-        # path = 'data/door_window_ends.pickle'
+        # wclo_path = 'data/door_window_ends.pickle'
         # l = [get_segments_ends(rect) for rect in l]
-        # with open(path, 'wb') as f:
+        # with open(wclo_path, 'wb') as f:
         #     pickle.dump(l, f)
 
     def test_plot_rooms_contours(self):

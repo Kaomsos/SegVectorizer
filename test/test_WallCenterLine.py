@@ -225,8 +225,8 @@ class TestWallCenterLine(unittest.TestCase):
 
     def test_room_type(self):
         # get add_boundary
-        # path = '../data/flat_0.png'
-        # self._init_img(path)
+        # wclo_path = '../data/flat_0.png'
+        # self._init_img(wclo_path)
 
         path = '../data/seg_reduced.pickle'
         self._init_matrix(path)

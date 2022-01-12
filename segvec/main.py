@@ -23,8 +23,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--img", "-i", type=str, help="input of the script")
     param = parser.parse_known_args()[0]
-    # path = param.img
-    # convert_an_image(path, palette_config=p_config)
+    # wclo_path = param.img
+    # convert_an_image(wclo_path, palette_config=p_config)
     import pickle
     with open("../data/seg.pickle", 'rb') as f:
         seg = pickle.load(f)

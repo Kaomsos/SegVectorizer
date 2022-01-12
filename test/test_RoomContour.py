@@ -91,8 +91,8 @@ class TestRoomContourOptimization(unittest.TestCase):
             print(f'the {i+1}th room has been optimized')
         ######################################
         # pickle the contours
-        # path = '../data/countours-1.pickle'
-        # with open(path, 'wb') as f:
+        # wclo_path = '../data/countours-1.pickle'
+        # with open(wclo_path, 'wb') as f:
         #     pickle.dump(opt_contours, f)
 
         print('--- end ---')
