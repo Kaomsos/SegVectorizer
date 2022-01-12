@@ -145,6 +145,13 @@ class WallCenterLine(UndirectedGraph):
         return mapping
 
     @property
+    def e2i(self):
+        edges = self.edges
+        n_edges = len(edges)
+        mapping = dict(zip(edges, range(n_edges)))
+        return mapping
+
+    @property
     def segments_collection(self) -> Tuple[np.ndarray, np.ndarray]:
         S, E = self.segments_matrix
         S_p, E_p = S @ self._cur_coordinates, E @ self._cur_coordinates
@@ -166,6 +173,10 @@ class WallCenterLine(UndirectedGraph):
     def get_coordinate_by_v(self, v: Vertex) -> Coordinate2D:
         i = self._v2i[v]
         return self._cur_coordinates[i]
+
+    def set_coordinate_by_v(self, v: Vertex, value: Coordinate2D) -> None:
+        i = self._v2i[v]
+        self._cur_coordinates[i] = np.array(value)
 
     def _get_coordinates_by_ps(self, ps: List[Vertex]):
         indices = [self._v2i[self._p2v[p]] for p in ps]
@@ -250,6 +261,7 @@ class WallCenterLineWithOpenPoints(WallCenterLine):
         self._update_v2i_i2v()
         return v
 
+    # TODO: to merge overlapping vertices
     def insert_open_to_edge(self, seg: Segment, e: Edge) -> Edge:
         self._check_edge_exists(e)
         e1 = self.get_coordinate_by_v(e[0])
@@ -273,6 +285,8 @@ class WallCenterLineWithOpenPoints(WallCenterLine):
 
         self.connect_vertices(e[0], to_e1)
         self.connect_vertices(e[1], to_e2)
+        self.disconnect_vertices(*e)
+
         self._add_to_opens((v1, v2))
 
         return v1, v2

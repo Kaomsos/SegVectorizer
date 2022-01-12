@@ -63,7 +63,13 @@ class TestAlignment(TestCase):
         # put everything together
         plot_empty_image_like(self.seg)
         plot_wcl_o_against_target(self.wcl_o, title='', annotation=False, show=False)
-        plot_rooms_in_wcl(self.wcl_o, self.p_config, title="show room types", contour=False, show=True)
+        plot_rooms_in_wcl(self.wcl_o, self.p_config, title="before aligning", contour=False, show=True)
 
-        optimize(self.wcl_o)
+        optimize(self.wcl_o, slanting_tol=20)
+        # after optimize
+        plot_empty_image_like(self.seg)
+        plot_wcl_o_against_target(self.wcl_o, title='', annotation=False, show=False)
+        plot_rooms_in_wcl(self.wcl_o, self.p_config, title="after aligning", contour=False, show=True)
+
+
 
