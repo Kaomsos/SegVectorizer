@@ -16,6 +16,7 @@ from .main_steps.room_contour import alternating_optimize as fit_room_contour
 from .main_steps.wall_center_line import alternating_optimize as fit_wall_center_line
 from .main_steps.open_points import fit_open_points, insert_open_points_in_wcl
 from .main_steps.room_type import refine_room_types
+from .main_steps.alignment import optimize as enhance_alignment
 
 
 class PaletteConfiguration(UserDict):
@@ -138,6 +139,8 @@ class Vectorizer:
         self._max_iter_wcl_alt_opt = 10
         self._max_iter_wcl_coord_opt = 5
 
+        self._slanting_tolerance = 20
+
     def _parse_palette(self, config: PaletteConfiguration):
         self._door_colors = config.doors
         self._window_colors = config.windows
@@ -170,6 +173,7 @@ class Vectorizer:
 
         # wall center line optimization
         wcl = self.get_wall_center_line(room_contours, boundary_cc)
+        self.enhance_alignment(wcl)
 
         # open points extraction
         wcl_o = self.insert_open_points_in_wcl(opens=rects, wcl=wcl)
@@ -253,6 +257,9 @@ class Vectorizer:
                                        max_coord_iter=self._max_iter_wcl_coord_opt,
                                        )
         return wcl_new
+
+    def enhance_alignment(self, wcl: WallCenterLine):
+        enhance_alignment(wcl, self._slanting_tolerance)
 
     @staticmethod
     def insert_open_points_in_wcl(opens: List[Rectangle], wcl: WallCenterLine) -> WallCenterLineWithOpenPoints:

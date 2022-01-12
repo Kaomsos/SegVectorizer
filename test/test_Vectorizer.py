@@ -200,7 +200,7 @@ class TestVectorizer(unittest.TestCase):
 
         # wall center line optimization
         wcl = vec.get_wall_center_line(room_contours, boundary_cc)
-
+        vec.enhance_alignment(wcl)
         plot_wcl_against_target(wcl, boundary_cc, 'wall center line', show=True)
 
         # open points extraction
@@ -219,6 +219,6 @@ class TestVectorizer(unittest.TestCase):
         plot_wcl_o_against_target(wcl_o, title='', annotation=False, show=False)
         plot_rooms_in_wcl(wcl_o, p_config, title="show room types", contour=False, show=True)
 
-        wclo_path = '../data/wcl_o.pickle'
-        with open(wclo_path, 'wb') as f:
-            pickle.dump(wcl_o, f)
+        # wclo_path = '../data/wcl_o.pickle'
+        # with open(wclo_path, 'wb') as f:
+        #     pickle.dump(wcl_o, f)

@@ -51,7 +51,7 @@ def get_vertices_from_edges(edges: List[Edge]) -> Set[Vertex]:
     return s
 
 
-def optimize(wcl_o: WallCenterLineWithOpenPoints,
+def optimize(wcl_o: WallCenterLine,
              slanting_tol: float = 10,
              ):
     assert 0 <= slanting_tol < 45
