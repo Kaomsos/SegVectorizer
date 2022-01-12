@@ -219,6 +219,6 @@ class TestVectorizer(unittest.TestCase):
         plot_wcl_o_against_target(wcl_o, title='', annotation=False, show=False)
         plot_rooms_in_wcl(wcl_o, p_config, title="show room types", contour=False, show=True)
 
-        # wclo_path = '../data/wcl_mpmw.pickle'
-        # with open(wclo_path, 'wb') as f:
-        #     pickle.dump(wcl, f)
+        wclo_path = '../data/wcl_o.pickle'
+        with open(wclo_path, 'wb') as f:
+            pickle.dump(wcl_o, f)

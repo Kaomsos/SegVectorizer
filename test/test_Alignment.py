@@ -2,6 +2,8 @@ from unittest import TestCase
 import pickle
 from segvec import PaletteConfiguration
 from segvec.utils import *
+from segvec.entity.wall_center_line import WallCenterLineWithOpenPoints
+from segvec.main_steps.alignment import optimize
 
 
 class TestAlignment(TestCase):
@@ -62,3 +64,6 @@ class TestAlignment(TestCase):
         plot_empty_image_like(self.seg)
         plot_wcl_o_against_target(self.wcl_o, title='', annotation=False, show=False)
         plot_rooms_in_wcl(self.wcl_o, self.p_config, title="show room types", contour=False, show=True)
+
+        optimize(self.wcl_o)
+

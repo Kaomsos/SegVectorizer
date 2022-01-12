@@ -76,6 +76,9 @@ class UndirectedGraph:
 
         return adj_list
 
+    def get_adjacent_vertices(self, i: Vertex):
+        return self._adjacency_list[i]
+
     @property
     def vertices(self) -> List[Vertex]:
         # this property may be useless
