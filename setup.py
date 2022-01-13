@@ -7,7 +7,7 @@ data_files = glob.glob("data/*")
 
 setup(
     name='SegVectorizer',     # 包名字
-    version='1.0',   # 包版本
+    version='1.1',   # 包版本
     description='a vectorizer for floor plan segmentation',   # 简单描述
     author='Wen Tao',  # 作者
     author_email='wentaoyyan@qq.com',  # 作者邮箱
