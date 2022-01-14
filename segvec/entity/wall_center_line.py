@@ -249,6 +249,43 @@ class WallCenterLineWithOpenPoints(WallCenterLine):
     def windows(self) -> List[np.ndarray]:
         return [np.stack(self.get_coordinates_by_e(e)) for e in self._window_edge]
 
+    @property
+    def walls(self) -> List[np.ndarray]:
+        return [np.stack(self.get_coordinates_by_e(e)) for e in set(self.edges) - set(self._open_edge)]
+
+    @property
+    def json(self):
+        coord = self._cur_coordinates.tolist()
+
+        vertices = list(self._adjacency_list.keys())
+        v2c = {v: coord[self._v2i[v]] for v in vertices}
+        opens = list(filter(lambda x: x[0] <= x[1], self._open_edge))
+        doors = list(filter(lambda x: x[0] <= x[1], self._door_edge))
+        windows = list(filter(lambda x: x[0] <= x[1], self._window_edge))
+        walls = list(set(self.edges) - set(self._open_edge))
+
+        rooms = [[self._p2v[p] for p in room] for room in self._rooms]
+        i2r = dict(enumerate(rooms))
+
+        json = {
+            "vertices": {
+                "all": vertices,
+                "coordinate": v2c,
+            },
+
+            "edges": {
+                "door": doors,
+                "window": windows,
+                "wall": walls,
+            },
+
+            "rooms": {
+                "all":  list(i2r.keys()),
+                "contour": i2r,
+            },
+        }
+        return json
+
     @classmethod
     def from_wcl(cls, wcl: WallCenterLine):
         inst = cls()
