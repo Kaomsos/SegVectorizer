@@ -126,7 +126,8 @@ class TestVectorizer(unittest.TestCase):
         plot_binary_image(bin_arr, show=True)
 
     def test_2d_array(self):
-        with open("../data/seg_reduced.pickle", 'rb') as f:
+
+        with open("../data/refined_seg.pickle", 'rb') as f:
             seg = pickle.load(f)
         p = {
             '厨房': -1,

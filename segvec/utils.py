@@ -139,7 +139,7 @@ def plot_position_of_rects(l: List[Rectangle], color="#3399ff", show=False):
     for i, rect in enumerate(l):
         center = rect.center
         ends = rect.ends
-        plt.plot(ends[..., 0], ends[..., 1], color=color)
+        plt.plot(ends[..., 0], ends[..., 1], color=color, lw=min(rect.w, rect.h) * 72 / plt.gcf().dpi)
         plt.text(center[0] + 5, center[1] - 5, f"{i}", size='x-small')
 
     if show:
