@@ -17,6 +17,7 @@ from .main_steps.wall_center_line import alternating_optimize as fit_wall_center
 from .main_steps.open_points import fit_open_points, insert_open_points_in_wcl
 from .main_steps.room_type import refine_room_types
 from .main_steps.alignment import optimize as enhance_alignment
+from .main_steps.wall_width import get_two_means
 
 
 class PaletteConfiguration(UserDict):
@@ -139,7 +140,20 @@ class Vectorizer:
         self._max_iter_wcl_alt_opt = 10
         self._max_iter_wcl_coord_opt = 5
 
+        # threshold for alignment
         self._slanting_tolerance = 20
+
+        # TODO: convert the following attributes to local variables
+        # threshold and representative value for  wall's width
+        self._thick_wall = None
+        self._thin_wall = None
+
+    @property
+    def wall_threshold(self):
+        if self._thin_wall is not None and self._thick_wall is not None:
+            return (self._thin_wall + self._thick_wall) / 2
+        else:
+            return None
 
     def _parse_palette(self, config: PaletteConfiguration):
         self._door_colors = config.doors
@@ -230,10 +244,13 @@ class Vectorizer:
         return [self._get_rectangle(o) for o in opens]
 
     def set_hyper_parameters_by_rectangles(self, rects: List[Rectangle]) -> None:
-        wall_width = np.array([(rect.w, rect.h) for rect in rects]).min(axis=-1).mean()
-        self._delta_a = wall_width * 1.5
-        self._delta_x = wall_width * 1.5
-        self._delta_y = wall_width * 1.5
+        wall_widths = np.array([(rect.w, rect.h) for rect in rects]).min(axis=-1)
+        w = wall_widths.mean()
+        self._delta_a = w * 1.5
+        self._delta_x = w * 1.5
+        self._delta_y = w * 1.5
+
+        self._thin_wall, self._thick_wall = get_two_means(wall_widths)
 
     def _get_room_contour(self, cc: SingleConnectedComponent) -> Contour:
         contour = fit_room_contour(cc,
