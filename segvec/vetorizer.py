@@ -17,7 +17,7 @@ from .main_steps.wall_center_line import alternating_optimize as fit_wall_center
 from .main_steps.open_points import fit_open_points, insert_open_points_in_wcl
 from .main_steps.room_type import refine_room_types
 from .main_steps.alignment import optimize as enhance_alignment
-from .main_steps.wall_width import get_two_means
+from .main_steps.wall_width import get_two_means, get_width
 
 
 class PaletteConfiguration(UserDict):
@@ -155,6 +155,20 @@ class Vectorizer:
         else:
             return None
 
+    @property
+    def thin_wall(self):
+        if self.wall_threshold is not None:
+            return self.wall_threshold * 2 / 3
+        else:
+            return None
+
+    @property
+    def thick_wall(self):
+        if self.wall_threshold is not None:
+            return self.wall_threshold * 4 / 3
+        else:
+            return None
+
     def _parse_palette(self, config: PaletteConfiguration):
         self._door_colors = config.doors
         self._window_colors = config.windows
@@ -289,3 +303,7 @@ class Vectorizer:
                                        background=(),
                                        )
         return room_types
+
+    def get_wall_width(self, boundary: np.ndarray, wcl: WallCenterLine):
+        get_width(target=boundary, wcl=wcl, thin_thick=(self._thick_wall, self._thick_wall))
+        return

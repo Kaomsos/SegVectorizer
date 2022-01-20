@@ -201,6 +201,7 @@ class TestVectorizer(unittest.TestCase):
 
         # wall center line optimization
         wcl = vec.get_wall_center_line(room_contours, boundary_cc)
+        vec.get_wall_width(boundary_cc, wcl)
         vec.enhance_alignment(wcl)
         plot_wcl_against_target(wcl, boundary_cc, 'wall center line', show=True)
 
