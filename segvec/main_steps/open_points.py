@@ -9,6 +9,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 import torch
 from sklearn.decomposition import PCA
+from sklearn.mixture import GaussianMixture
 from torch.optim import RMSprop
 
 from ..optimize import objective

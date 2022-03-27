@@ -240,6 +240,7 @@ def find_rooms(img, threshold=10) -> Dict[str, List[SingleConnectedComponent]]:
         img:
     :return:
     """
+    from .utils import palette
     rooms = {}
     for type_ in ['bathroom/washroom', 'livingroom/kitchen/dining add_room',
                   'bedroom', 'hall', 'balcony', 'closet']:

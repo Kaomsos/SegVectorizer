@@ -147,6 +147,8 @@ class Vectorizer:
         # threshold and representative value for  wall's width
         self._thick_wall = None
         self._thin_wall = None
+        self._width_max = None
+        self._width_min = None
 
     @property
     def wall_threshold(self):
@@ -157,6 +159,7 @@ class Vectorizer:
 
     @property
     def thin_wall(self):
+        # display width of thin wall
         if self.wall_threshold is not None:
             return self.wall_threshold * 2 / 3
         else:
@@ -164,6 +167,7 @@ class Vectorizer:
 
     @property
     def thick_wall(self):
+        # display width of thick wall
         if self.wall_threshold is not None:
             return self.wall_threshold * 4 / 3
         else:
@@ -265,6 +269,7 @@ class Vectorizer:
         self._delta_y = w * 1.5
 
         self._thin_wall, self._thick_wall = get_two_means(wall_widths)
+        self._width_max, self._width_min = max(wall_widths), min(wall_widths)
 
     def _get_room_contour(self, cc: SingleConnectedComponent) -> Contour:
         contour = fit_room_contour(cc,
@@ -305,5 +310,6 @@ class Vectorizer:
         return room_types
 
     def get_wall_width(self, boundary: np.ndarray, wcl: WallCenterLine):
-        get_width(target=boundary, wcl=wcl, thin_thick=(self._thick_wall, self._thick_wall))
-        return
+        widths = get_width(target=boundary, wcl=wcl, thin_thick=(self.thin_wall, self.thick_wall), boundary=(self._width_min, self._width_max))
+        return widths
+

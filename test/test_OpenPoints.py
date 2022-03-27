@@ -108,7 +108,7 @@ class TestOpenPointExtraction(unittest.TestCase):
         plt.title("positions of doors & windows against target")
         plt.show()
 
-        # save ends
+        # save center_line
         # wclo_path = 'data/door_window_ends.pickle'
         # l = [get_segments_ends(rect) for rect in l]
         # with open(wclo_path, 'wb') as f:
