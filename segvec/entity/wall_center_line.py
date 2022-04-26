@@ -193,6 +193,10 @@ class WallCenterLine(UndirectedGraph):
         i = self._v2i[v]
         self._cur_coordinates[i] = np.array(value)
 
+    def set_width_by_e(self, e: Edge, width: float):
+        self._widths[e] = width
+
+
     def _get_coordinates_by_ps(self, ps: List[Vertex]):
         indices = [self._v2i[self._p2v[p]] for p in ps]
         return self._cur_coordinates[indices]

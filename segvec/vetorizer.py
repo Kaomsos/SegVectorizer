@@ -16,8 +16,8 @@ from .main_steps.room_contour import alternating_optimize as fit_room_contour
 from .main_steps.wall_center_line import alternating_optimize as fit_wall_center_line
 from .main_steps.open_points import fit_open_points, insert_open_points_in_wcl
 from .main_steps.room_type import refine_room_types
-from .main_steps.alignment import optimize as enhance_alignment
-from .main_steps.wall_width import get_two_means, get_width
+from .main_steps.alignment import align_vertex as enhance_alignment
+from .main_steps.wall_width import get_two_means, get_width, WallWidthSolver
 
 
 class PaletteConfiguration(UserDict):
@@ -314,3 +314,17 @@ class Vectorizer:
         widths = get_width(target=boundary, wcl=wcl, thin_thick=(self.thin_wall, self.thick_wall), boundary=(self._width_min, self._width_max))
         return widths
 
+    def set_widths_of_wcl(self, wcl: WallCenterLine, boundary: np.ndarray):
+        for edge in wcl.edges:
+            s = wcl.get_coordinate_by_v(edge[0])
+            e = wcl.get_coordinate_by_v(edge[1])
+
+            solver = WallWidthSolver(target=boundary, edge=(s, e), optimizer='exhaustive', boundary=(self._width_min, self._width_max))
+            w1, w2 = solver.solve()
+            n_v = solver.normal_vector
+
+            delta = n_v * (w1 - w2) / 2
+
+            wcl.set_width_by_e(edge, w1 + w2)
+            wcl.set_coordinate_by_v(edge[0], s + delta)
+            wcl.set_coordinate_by_v(edge[1], e + delta)

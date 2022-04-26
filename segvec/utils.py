@@ -101,7 +101,10 @@ def plot_wall_center_lines(wcl: WallCenterLine,
                            title: str = "",
                            show=True):
     sps, eps = wcl.segments_collection
-    wcl_widths = wcl.widths
+
+    if widths:
+        wcl_widths = wcl.widths
+
     for i, (sp, ep) in enumerate(zip(sps, eps)):
         xs = [p[0] for p in [sp, ep]]
         ys = [p[1] for p in [sp, ep]]

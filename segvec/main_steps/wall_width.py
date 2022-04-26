@@ -4,6 +4,7 @@ if TYPE_CHECKING:
     from ..typing_ import Segment, WallCenterLine
 from sklearn.mixture import GaussianMixture
 import numpy as np
+import itertools
 
 from ..geometry import rasterize_polygon, get_bounding_box
 
@@ -60,13 +61,9 @@ def get_width(target: np.ndarray, wcl: WallCenterLine, thin_thick: Tuple[float, 
     thin, thick = thin_thick
     arr_shape = target.shape
     widths = []
-    clses = []
     for ends in zip(*wcl.segments_collection):
-        m_thin = iou(target, rasterize_by_rec_center(arr_shape, ends, thin))
-        m_thick = iou(target, rasterize_by_rec_center(arr_shape, ends, thick))
-        solver = WallWidthSolver(target, ends, boundary, threshold=(thin + thick) / 2)
-        clses.append(solver.solve())
-        widths.append(thin if m_thin > m_thick else thick)
+        solver = WallWidthSolver(target, ends, boundary=boundary, optimizer='exhaustive', threshold=(thin + thick) / 2)
+        widths.append(solver.solve())
     return widths
 
 
@@ -75,7 +72,8 @@ class WallWidthSolver:
                  target: np.ndarray,
                  edge: Segment,
                  boundary: Tuple[float, float],
-                 threshold: float
+                 optimizer='exhaustive',
+                 threshold: float = None,
                  ) -> None:
         self._target = target
         self._arr_shape = target.shape
@@ -86,7 +84,13 @@ class WallWidthSolver:
 
         self._min, self._max = boundary
         self._min, self._max = round(self._min), round(self._max)
-        self._threshold = round(threshold)
+
+        self._optimizer = optimizer
+        if self._optimizer == 'binary_search':
+            assert threshold is not None
+            assert boundary is not None
+
+            self._threshold = round(threshold)
 
         self._mask = rasterize_by_rec_center(self._arr_shape, edge, self._max * 1.5)
 
@@ -97,6 +101,10 @@ class WallWidthSolver:
         self._f: Dict[int, float] = {0: 0}
         self._ldf: Dict[int, float] = {}
         self._rdf: Dict[int, float] = {}
+
+    @property
+    def normal_vector(self):
+        return self._normal_vec
 
     def _rasterize(self, width: float, reverse=False) -> np.ndarray:
         delta = self._normal_vec * width
@@ -116,6 +124,32 @@ class WallWidthSolver:
                    self._mask)
 
     def solve(self):
+        if self._optimizer == 'binary_search':
+            cls = self._optim_binary_search()
+            return cls
+        elif self._optimizer == 'exhaustive':
+            width = self._optim_exhaustive()
+            return width
+        else:
+            raise ValueError(f'optimizer: <{self._optimizer}> is not supported')
+
+    def _optim_exhaustive(self):
+        f = [0, self._iou(1)]
+        for w in itertools.count(2):
+            f.append(self._iou(w))
+            if f[-3] > f[-2] > f[-1]:
+                break
+        w1 = np.argmax(f)
+
+        f = [0, self._reverse_iou(1)]
+        for w in itertools.count(2):
+            f.append(self._reverse_iou(w))
+            if f[-3] > f[-2] > f[-1]:
+                break
+        w2 = np.argmax(f)
+        return w1, w2
+
+    def _optim_binary_search(self):
         self._objective = self._iou
         threshold = self._threshold
         case = self._inspect_threshold(threshold)

@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, List, Set, Dict
+
 if TYPE_CHECKING:
     from ..typing_ import WallCenterLineWithOpenPoints, WallCenterLine, Edge, Vertex
 
@@ -51,9 +52,9 @@ def get_vertices_from_edges(edges: List[Edge]) -> Set[Vertex]:
     return s
 
 
-def optimize(wcl_o: WallCenterLine,
-             slanting_tol: float = 10,
-             ):
+def align_vertex(wcl_o: WallCenterLine,
+                 slanting_tol: float = 10,
+                 ):
     assert 0 <= slanting_tol < 45
     sin_threshold = np.sin(np.pi * slanting_tol / 180)
 

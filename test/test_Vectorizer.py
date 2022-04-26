@@ -201,9 +201,12 @@ class TestVectorizer(unittest.TestCase):
 
         # wall center line optimization
         wcl = vec.get_wall_center_line(room_contours, boundary_cc)
-        vec.enhance_alignment(wcl)
-        widths = vec.get_wall_width(boundary_cc, wcl)
-        wcl.widths = widths
+        plot_wcl_against_target(wcl, boundary_cc, title='wall center line', widths=False, show=True)
+        # widths = vec.get_wall_width(boundary_cc, wcl)
+        # wcl.widths = widths
+        vec.set_widths_of_wcl(wcl, boundary_cc)
+        # vec.enhance_alignment(wcl)
+
         plot_wcl_against_target(wcl, boundary_cc, title='wall center line', widths=True, show=True)
 
         # open points extraction
