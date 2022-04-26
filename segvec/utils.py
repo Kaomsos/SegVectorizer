@@ -95,12 +95,20 @@ def plot_room_contours(contours: List[Contour], show=False):
         plt.show()
 
 
-def plot_wall_center_lines(wcl: WallCenterLine, annotation=True, title: str = "", show=True):
+def plot_wall_center_lines(wcl: WallCenterLine,
+                           widths=False,
+                           annotation=True,
+                           title: str = "",
+                           show=True):
     sps, eps = wcl.segments_collection
-    for sp, ep in zip(sps, eps):
+    wcl_widths = wcl.widths
+    for i, (sp, ep) in enumerate(zip(sps, eps)):
         xs = [p[0] for p in [sp, ep]]
         ys = [p[1] for p in [sp, ep]]
-        plt.plot(xs, ys, color='#3399ff')
+        if widths:
+            plt.plot(xs, ys, color='#3399ff', lw=wcl_widths[i] * 72 / plt.gcf().dpi)
+        else:
+            plt.plot(xs, ys, color='#3399ff')
 
     if annotation:
         pos = wcl.V
@@ -113,10 +121,15 @@ def plot_wall_center_lines(wcl: WallCenterLine, annotation=True, title: str = ""
         plt.show()
 
 
-def plot_wcl_against_target(wcl, target=None, title='', annotation=True, show=True):
+def plot_wcl_against_target(wcl,
+                            target=None,
+                            title='',
+                            widths=False,
+                            annotation=True,
+                            show=True):
     if target is not None:
         plt.imshow(1 - target, cmap='gray')
-    plot_wall_center_lines(wcl, title=title, annotation=annotation, show=False)
+    plot_wall_center_lines(wcl, title=title, widths=widths, annotation=annotation, show=False)
     if show:
         plt.show()
 
@@ -147,19 +160,34 @@ def plot_position_of_rects(l: List[Rectangle], color="#3399ff", show=False):
 
 
 def plot_wcl_o_against_target(wcl_o: WallCenterLineWithOpenPoints,
-                              target: np.ndarray = None ,
+                              target: np.ndarray = None,
                               title='',
+                              widths=False,
                               annotation=True,
                               show=True):
-    plot_wcl_against_target(wcl_o, target, title=title, annotation=annotation, show=False)
+    plot_wcl_against_target(wcl_o, target,
+                            title=title,
+                            widths=widths,
+                            annotation=annotation,
+                            show=False)
 
-    for e in wcl_o.windows:
-        p1, p2 = e
-        plt.plot([p1[0], p2[0]], [p1[1], p2[1]], color='red')
+    if widths:
+        windows_widths = wcl_o.windows_widths
+        doors_widths = wcl_o.doors_widths
 
-    for e in wcl_o.doors:
+    for i, e in enumerate(wcl_o.windows):
         p1, p2 = e
-        plt.plot([p1[0], p2[0]], [p1[1], p2[1]], color='lime')
+        if widths:
+            plt.plot([p1[0], p2[0]], [p1[1], p2[1]], lw=windows_widths[i] * 72 / plt.gcf().dpi, color='red')
+        else:
+            plt.plot([p1[0], p2[0]], [p1[1], p2[1]], color='red')
+
+    for i, e in enumerate(wcl_o.doors):
+        p1, p2 = e
+        if widths:
+            plt.plot([p1[0], p2[0]], [p1[1], p2[1]], lw=doors_widths[i] * 72 / plt.gcf().dpi, color='lime')
+        else:
+            plt.plot([p1[0], p2[0]], [p1[1], p2[1]], color='lime')
 
     if show:
         plt.show()

@@ -202,13 +202,18 @@ class TestVectorizer(unittest.TestCase):
         # wall center line optimization
         wcl = vec.get_wall_center_line(room_contours, boundary_cc)
         vec.enhance_alignment(wcl)
-        width = vec.get_wall_width(boundary_cc, wcl)
-        plot_wcl_against_target(wcl, boundary_cc, 'wall center line', show=True)
+        widths = vec.get_wall_width(boundary_cc, wcl)
+        wcl.widths = widths
+        plot_wcl_against_target(wcl, boundary_cc, title='wall center line', widths=True, show=True)
 
         # open points extraction
         wcl_o = vec.insert_open_points_in_wcl(rects, wcl)
 
-        plot_wcl_o_against_target(wcl_o, boundary_cc, 'wall center line with open points', annotation=False, show=True)
+        plot_wcl_o_against_target(wcl_o, boundary_cc,
+                                  title='wall center line with open points',
+                                  widths=True,
+                                  annotation=False,
+                                  show=True)
 
         # room type refinement
         wcl_o.room_types = vec.get_room_type(wcl_o, seg)
@@ -218,7 +223,7 @@ class TestVectorizer(unittest.TestCase):
 
         # put everything together
         plot_empty_image_like(seg)
-        plot_wcl_o_against_target(wcl_o, title='', annotation=False, show=False)
+        plot_wcl_o_against_target(wcl_o, title='', annotation=False, widths=True, show=False)
         plot_rooms_in_wcl(wcl_o, p_config, title="show room types", contour=False, show=True)
 
         # wclo_path = '../data/wcl_o.pickle'

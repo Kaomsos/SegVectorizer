@@ -48,6 +48,9 @@ class WallCenterLine(UndirectedGraph):
         self._init_coordinates = coordinates
         self._cur_coordinates = coordinates
 
+        # additional attributes of wcl
+        self._widths: dict = {}
+
         ##############################################################
         # defining mappings
         # Sets:
@@ -116,6 +119,18 @@ class WallCenterLine(UndirectedGraph):
         S[range_i, s_i] = 1
         E[range_i, e_i] = 1
         return S, E
+
+    @property
+    def widths(self):
+        l = []
+        for s, e in self.edges:
+            l.append(self._widths[(s, e)])
+        return l
+
+    @widths.setter
+    def widths(self, val):
+        for e, v in zip(self.edges, val):
+            self._widths[e] = v
 
     @property
     def L(self) -> np.ndarray:
@@ -246,8 +261,16 @@ class WallCenterLineWithOpenPoints(WallCenterLine):
         return [np.stack(self.get_coordinates_by_e(e)) for e in self._door_edge]
 
     @property
+    def doors_widths(self):
+        return [self._widths[e] for e in self._door_edge]
+
+    @property
     def windows(self) -> List[np.ndarray]:
         return [np.stack(self.get_coordinates_by_e(e)) for e in self._window_edge]
+
+    @property
+    def windows_widths(self):
+        return [self._widths[e] for e in self._window_edge]
 
     @property
     def walls(self) -> List[np.ndarray]:
@@ -280,7 +303,7 @@ class WallCenterLineWithOpenPoints(WallCenterLine):
             },
 
             "rooms": {
-                "all":  list(i2r.keys()),
+                "all": list(i2r.keys()),
                 "contour": i2r,
             },
         }
@@ -309,6 +332,10 @@ class WallCenterLineWithOpenPoints(WallCenterLine):
         v2 = self.add_vertex(p2)
         self.connect_vertices(v1, v2)
 
+        width = self._widths[e]
+        self._widths[(v1, v2)] = width
+        self._widths[(v2, v1)] = width
+
         # use L1 distance for comparing
         if np.abs(p1 - e1).sum() < np.abs(p2 - e1).sum():
             to_e1 = v1
@@ -322,6 +349,9 @@ class WallCenterLineWithOpenPoints(WallCenterLine):
 
         self.connect_vertices(e[0], to_e1)
         self.connect_vertices(e[1], to_e2)
+        self._widths[(e[0], to_e1)] = width
+        self._widths[(e[1], to_e2)] = width
+
         self.disconnect_vertices(*e)
 
         self._add_to_opens((v1, v2))
@@ -354,4 +384,3 @@ class WallCenterLineWithOpenPoints(WallCenterLine):
     def _add_edge_to_list(e: Edge, l: list):
         l.append(e)
         l.append(e[::-1])
-

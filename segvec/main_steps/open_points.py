@@ -9,7 +9,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 import torch
 from sklearn.decomposition import PCA
-from sklearn.mixture import GaussianMixture
+from scipy.stats import norm
 from torch.optim import RMSprop
 
 from ..optimize import objective
@@ -33,6 +33,17 @@ class PCAFitter(RectangleFitter):
         self.pca = PCA(n_components=2)
 
     def fit(self, target: SingleConnectedComponent) -> Rectangle:
+        """
+            plt.figure(figsize=(5, 12))
+            plt.scatter(X[..., 0], X[..., 1], marker='o', facecolors='none', edgecolors='tab:blue')
+            plt.scatter([center[0],], [center[1],], marker='o', sizes=[10,])
+            plt.plot(rect.ends[..., 0], rect.ends[..., 1], color='orange')
+            plt.xlim([10, 50])
+            plt.ylim([20, 180])
+            plt.xlabel("x")
+            plt.ylabel("y")
+            plt.show()
+        """
         X = np.argwhere(target.array)[..., [1, 0]]
         assert len(X.shape) == 2
         assert X.shape[1] == 2
@@ -41,9 +52,14 @@ class PCAFitter(RectangleFitter):
 
         center = X.mean(axis=0)
         w_vec, h_vec = self.pca.components_
-        w, h = X_trans.max(axis=0) - X_trans.min(axis=0)
+
+        # range estimator
+        # w, h = X_trans.max(axis=0) - X_trans.min(axis=0)
+        # 3-sigma estimator
+        w, h = norm.fit(X_trans[..., 0])[1] * 3, norm.fit(X_trans[..., 1])[1] * 3
 
         rect = Rectangle(w=w, h=h, center=center, w_vec=w_vec, h_vec=h_vec)
+
         return rect
 
 
