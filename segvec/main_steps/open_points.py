@@ -29,8 +29,15 @@ class RectangleFitter(ABC):
 
 
 class PCAFitter(RectangleFitter):
-    def __init__(self):
+    __size_estimators__ = ['gaussian', 'min_max']
+
+    def __init__(self, size_estimator: str = None):
         self.pca = PCA(n_components=2)
+
+        if size_estimator is None:
+            size_estimator = 'gaussian'
+        assert size_estimator in self.__size_estimators__
+        self._size_estimator = size_estimator
 
     def fit(self, target: SingleConnectedComponent) -> Rectangle:
         """
@@ -53,10 +60,12 @@ class PCAFitter(RectangleFitter):
         center = X.mean(axis=0)
         w_vec, h_vec = self.pca.components_
 
-        # range estimator
-        # w, h = X_trans.max(axis=0) - X_trans.min(axis=0)
-        # 3-sigma estimator
-        w, h = norm.fit(X_trans[..., 0])[1] * 3, norm.fit(X_trans[..., 1])[1] * 3
+        if self._size_estimator == 'gaussian':
+            w, h = norm.fit(X_trans[..., 0])[1] * 3, norm.fit(X_trans[..., 1])[1] * 3
+        elif self._size_estimator == 'min_max':
+            w, h = X_trans.max(axis=0) - X_trans.min(axis=0)
+        else:
+            raise ValueError('wrong size estimator')
 
         rect = Rectangle(w=w, h=h, center=center, w_vec=w_vec, h_vec=h_vec)
 
@@ -64,17 +73,32 @@ class PCAFitter(RectangleFitter):
 
 
 class SoftRasFitter(RectangleFitter):
-    def __init__(self, sigma=0.1, max_iter=5, lr=0.1, log_iou_target=-0.5):
-        self._rasterizer = None
-        self._optimizer = None
-
+    def __init__(self,
+                 sigma=0.1,
+                 max_iter=5,
+                 lr=0.1,
+                 iou_target=None,
+                 patience=3,
+                 min_delta=0,
+                 verbose=None,
+                 ):
         self._sigma = sigma
 
+        assert isinstance(max_iter, int)
         self._max_iter = max_iter
-        self._log_iou_target = log_iou_target
-        self._i = None
+
         self._lr = lr
-        self._verbose = None
+        self._verbose = verbose
+
+        self._log_iou_target = -torch.log(torch.tensor(iou_target))
+        assert patience is None or isinstance(patience, int)
+        self._patience = patience
+        self._min_delta = min_delta
+
+        self._i = None
+
+        self._rasterizer = None
+        self._optimizer = None
 
         self._w, self._h, self._theta = None, None, None
         self._loss = None
@@ -106,12 +130,25 @@ class SoftRasFitter(RectangleFitter):
 
         self._optimizer = RMSprop([self._w, self._h, self._theta], lr=self._lr)
 
+        loss_history = []
+
         for i in range(self._max_iter):
             self._i = i
             self._rendered = self._rasterizer.rasterize(self._w, self._h, self._theta)
             self._loss = -log_iou(rendered=self._rendered, target=component.array)
-            if -self._loss >= self._log_iou_target:
+
+            if self._log_iou_target is not None \
+                    and self._loss <= self._log_iou_target:
                 break
+
+            if self._patience is not None:
+                loss_history.append(self._loss.detach().cpu().numpy().tolist())
+                if len(loss_history) >= self._patience:
+                    if check_loss_history(loss_history, self._min_delta):
+                        loss_history.pop(0)
+                    else:
+                        break
+
             self._loss.backward()
             self._optimizer.step()
             self._hook_after_step()
@@ -151,17 +188,28 @@ class SoftRasFitter(RectangleFitter):
 
     @property
     def result(self):
-        return self._cc.objective.center, \
+        return self._cc.center, \
                (float(self.w), float(self.h), float(self.theta))
 
 
-def fit_open_points(target: SingleConnectedComponent, fitter=PCAFitter()) -> Rectangle:
+def check_loss_history(history, min_delta=0):
+    assert len(history) >= 2
+    base = history[0]
+    for x in history[1:]:
+        if base - x > min_delta:
+            return True
+    return False
+
+
+def fit_open_points(target: SingleConnectedComponent, fitter=None) -> Rectangle:
     """
     a wrapper for Rectangle Fitter
     :param target:
     :param fitter:
     :return:
     """
+    if fitter is None:
+        fitter = PCAFitter()
     rect = fitter.fit(target)
     return rect
 

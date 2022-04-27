@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import Tuple, TYPE_CHECKING
+
 if TYPE_CHECKING:
     from ..typing_ import Coordinate2D, Length, Radius, Vector2D
 
@@ -31,7 +32,7 @@ class Polygon:
             vertices_ = approximate_polygon(connected_component.boundary, tolerance=self._tol)
 
         elif arr is not None:
-            contours = find_contours(arr)    # delete the last points
+            contours = find_contours(arr)  # delete the last points
             assert len(contours) <= 1, 'more than one connected target are detected'
             assert len(contours) > 0, 'no connected target is detected'
             vertices_ = approximate_polygon(contours[0], tolerance=self._tol)
@@ -87,6 +88,7 @@ class Rectangle:
     """
      a vector representation of any rectangle on a 2D plane
     """
+
     def __init__(self,
                  center: Coordinate2D,
                  w: Length,
@@ -99,21 +101,21 @@ class Rectangle:
         self.center = np.array(center)
         self.w = w
         self.h = h
-        self.theta = theta
-        self.R = None
-        self.w_vec = np.array(w_vec)
-        self.w_vec = self.w_vec / np.sqrt((self.w_vec * self.w_vec).sum())
-        self.h_vec = np.array(h_vec)
-        self.h_vec = self.h_vec / np.sqrt((self.h_vec * self.h_vec).sum())
-
-        self.has_theta: bool = theta is not None
-        if self.has_theta:
-            self.R: np.ndarray = np.array([[np.cos(theta), -np.sin(theta)],
-                                           [np.sin(theta), np.cos(theta)]])
 
         self.has_vec: bool = (w_vec is not None) and (h_vec is not None)
-
+        self.has_theta: bool = theta is not None
         assert self.has_theta or self.has_vec
+
+        if self.has_vec:
+            self.w_vec = np.array(w_vec)
+            self.h_vec = np.array(h_vec)
+            self.w_vec = self.w_vec / np.sqrt((self.w_vec * self.w_vec).sum())
+            self.h_vec = self.h_vec / np.sqrt((self.h_vec * self.h_vec).sum())
+
+        if self.has_theta:
+            self.theta = theta
+            self.R: np.ndarray = np.array([[np.cos(theta), -np.sin(theta)],
+                                           [np.sin(theta), np.cos(theta)]])
 
         self.tag = tag
 
@@ -134,3 +136,19 @@ class Rectangle:
 
         return self.center + np.array([direction, -direction]) * delta
 
+    @property
+    def polygon(self) -> np.ndarray:
+        if self.has_vec:
+            delta = (self.w_vec * self.w + self.h_vec * self.h) / 2
+
+        elif self.has_theta:
+            delta = self.R @ np.array([self.w, self.h]) / 2
+
+        else:
+            raise ValueError("no enough parameters to define a recrangle")
+
+        polygon = self.center + np.array([[1, 1],
+                                          [-1, 1],
+                                          [-1, -1],
+                                          [1, -1]]) * delta.T
+        return polygon

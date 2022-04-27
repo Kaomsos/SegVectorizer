@@ -190,5 +190,5 @@ class FixedCenterRectangle2DRasterizer(Base2DPolygonRasterizer):
                             torch.stack([torch.cos(theta), -torch.sin(theta)]),
                             torch.stack([torch.sin(theta), torch.cos(theta)])
                         ])
-        polygon = R @ (rect - self._center) + self._center
+        polygon = (rect - self._center) @ R.T + self._center
         return super(FixedCenterRectangle2DRasterizer, self).rasterize(polygon)

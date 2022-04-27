@@ -20,6 +20,7 @@ from segvec.utils import (plot_wcl_against_target,
                           plot_rooms_in_wcl)
 from segvec.utils import palette
 from segvec.entity.image import SingleConnectedComponent
+from segvec.main_steps.open_points import SoftRasFitter
 
 
 class TestVectorizer(unittest.TestCase):
@@ -181,7 +182,7 @@ class TestVectorizer(unittest.TestCase):
         ##############################################
         # Init
         open_cc, boundary_cc, room_cc = vec.extract_connected_components(seg)
-        rects = vec.get_rectangles(open_cc)
+        rects = vec.get_rectangles(open_cc, SoftRasFitter(iou_target=0.8, lr=0.01, patience=3))
 
         plot_empty_image_like(seg)
         plot_position_of_rects(filter(lambda x: x.tag == 'door', rects), color='lime')
@@ -205,7 +206,7 @@ class TestVectorizer(unittest.TestCase):
         # widths = vec.get_wall_width(boundary_cc, wcl)
         # wcl.widths = widths
         vec.set_widths_of_wcl(wcl, boundary_cc)
-        # vec.enhance_alignment(wcl)
+        vec.enhance_alignment(wcl)
 
         plot_wcl_against_target(wcl, boundary_cc, title='wall center line', widths=True, show=True)
 

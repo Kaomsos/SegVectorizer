@@ -253,13 +253,13 @@ class Vectorizer:
         return open_cc, boundary_cc, room_cc
 
     @staticmethod
-    def _get_rectangle(open_: SingleConnectedComponent) -> Rectangle:
-        rect = fit_open_points(open_)
+    def _get_rectangle(open_: SingleConnectedComponent, fitter=None) -> Rectangle:
+        rect = fit_open_points(open_, fitter)
         rect.tag = open_.tag
         return rect
 
-    def get_rectangles(self, opens: List[SingleConnectedComponent]) -> List[Rectangle]:
-        return [self._get_rectangle(o) for o in opens]
+    def get_rectangles(self, opens: List[SingleConnectedComponent], fitter=None) -> List[Rectangle]:
+        return [self._get_rectangle(o, fitter) for o in opens]
 
     def set_hyper_parameters_by_rectangles(self, rects: List[Rectangle]) -> None:
         wall_widths = np.array([(rect.w, rect.h) for rect in rects]).min(axis=-1)
