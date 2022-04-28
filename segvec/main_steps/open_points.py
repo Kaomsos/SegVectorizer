@@ -195,6 +195,7 @@ class SoftRasFitter(RectangleFitter):
 
 
 def check_loss_history(history, min_delta=0):
+    # return True if continue
     assert len(history) >= 2
     base = history[0]
     for x in history[1:]:

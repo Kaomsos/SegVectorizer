@@ -9,6 +9,7 @@ from skimage.transform import downscale_local_mean
 from ..geometry import distance_p_to_plg, get_segments, distance_p_to_segments_tensor
 
 EPSILON = 1e-5
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 def log_iou(rendered, target, epsilon=1) -> torch.Tensor:
@@ -21,8 +22,9 @@ def log_iou(rendered, target, epsilon=1) -> torch.Tensor:
     return loss
 
 
-def boundary(polygon: torch.Tensor, target: np.ndarray) -> torch.Tensor:
+def boundary(polygon: torch.Tensor, target: np.ndarray, square=False) -> torch.Tensor:
     """
+    :param square:
     :param polygon: a list of vertices
     :param target: connected components of pixels
     :return: _loss
@@ -32,8 +34,8 @@ def boundary(polygon: torch.Tensor, target: np.ndarray) -> torch.Tensor:
     B = B[..., [1, 0]]
     distances = []
     for b in B:
-        distances.append(distance_p_to_plg(b, polygon, square=False))
-    loss = torch.stack(distances).sum()
+        distances.append(distance_p_to_plg(torch.as_tensor(b).to(device), polygon.to(device), square=square))
+    loss = torch.stack(distances).mean()
     return loss
 
 
@@ -41,7 +43,7 @@ def orthogonal(polygon: torch.Tensor) -> torch.Tensor:
     start_p, end_p = get_segments(polygon)
     edges_v = end_p - start_p                               # p(i-1) pi
     next_edges_v = torch.roll(edges_v, shifts=1, dims=0)    # pi p(i+1)
-    loss = torch.abs(edges_v * next_edges_v).sum()          # \sum_p |p(i-1) pi * pi p(i+1)|
+    loss = torch.abs((edges_v * next_edges_v).sum(axis=-1)).mean()          # \sum_p |p(i-1) pi * pi p(i+1)|
     return loss
 
 

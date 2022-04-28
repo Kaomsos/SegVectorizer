@@ -13,6 +13,8 @@ from ..entity.polygon import Polygon
 from ..optimize.objective import log_iou, boundary, orthogonal
 from ..optimize.softras import Base2DPolygonRasterizer as SoftRasterizer
 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 
 class PolygonVertexIterator:
     def __init__(self, plg: Polygon):
@@ -157,14 +159,24 @@ class CoordinateOptimizer:
     def __init__(self,
                  target: SingleConnectedComponent,
                  sigma: float = 1,
+                 weights=(0, 0, 0),
                  lr=0.1,
                  max_iter=5,
+                 patience=3,
+                 min_delta=0,
+                 iou_target=None,
                  ) -> None:
 
         self._cc = target
         self._sigma = sigma
+        self._w1, self._w2, self._w3 = weights
         self._lr = lr
+
         self._max_iter = max_iter
+
+        self._patience = patience
+        self._min_delta = min_delta
+
         self._verbose = None
         self._i = None
         self._P = None
@@ -180,28 +192,52 @@ class CoordinateOptimizer:
         :param verbose:
         :return:
         """
-        self._P = plg.torch_tensor
+        self._P = torch.as_tensor(plg.torch_tensor, device=device)
         self._optimizer = RMSprop([self._P], lr=self._lr)
         self._verbose = verbose
+
+        loss_history = []
         for i in range(self._max_iter):
             self._i = i
             L = self._objective()
+
+            loss_history.append(L.detach().cpu().numpy())
+            if len(loss_history) >= self._patience:
+                if check_loss_history(loss_history, min_delta=self._min_delta):
+                    loss_history.pop(0)
+                else:
+                    break
             L.backward()
+
             self._optimizer.step()
             self._hook_after_step()
         # update the polygon
         plg.set_vertices(self.optimized_result)
 
     def _rasterize(self, polygon: torch.Tensor):
-        self._rendered = self._rasterizer(polygon)
+        self._rendered = self._rasterizer.rasterize(polygon)
         self._hook_after_render()
         return self._rendered
 
     def _objective(self) -> torch.Tensor:
-        iou = log_iou(self._rasterize(self._P), self._cc.array)
-        bo = boundary(self._P, self._cc.boundary)
-        orth = orthogonal(self._P)
-        return -1 * iou + 5 * bo + 1 * orth
+        if self._w1 != 0:
+            rast = self._rasterize(self._P)
+            target = torch.as_tensor(self._cc.array, device=device)
+            iou = log_iou(rast, target)
+        else:
+            iou = torch.tensor(0., requires_grad=True)
+
+        if self._w2 != 0:
+            bo = boundary(self._P, self._cc.boundary)
+        else:
+            bo = torch.tensor(0., requires_grad=True)
+
+        if self._w3 != 0:
+            orth = orthogonal(self._P)
+        else:
+            orth = torch.tensor(0., requires_grad=True)
+
+        return -self._w1 * iou + self._w2 * bo + self._w3 * orth
 
     def plot_soft_ras(self):
         plt = importlib.import_module('.pyplot', 'matplotlib')
@@ -228,18 +264,39 @@ class CoordinateOptimizer:
         return self._P.detach().numpy()
 
 
+def check_loss_history(history, min_delta=0):
+    # return True if continue
+    assert len(history) >= 2
+    base = history[0]
+    for x in history[1:]:
+        if base - x > min_delta:
+            return True
+    return False
+
+
 def alternating_optimize(cc: SingleConnectedComponent,
                          delta_a=10,
                          delta_b=10,
                          max_alt_iter=5,
-                         max_coord_iter=0
+                         max_coord_iter=0,
+                         sigma=10,
+                         weights=(0, 0, 0),
+                         lr=0.01,
+                         patience=3,
+                         min_delta=0,
                          ) -> Contour:
     plg = Polygon(connected_component=cc, tol=5)
     reducer = VertexReducer(plg, delta_a=delta_a, delta_b=delta_b)
-    opt = CoordinateOptimizer(target=cc, max_iter=max_coord_iter, sigma=10)
+    opt = CoordinateOptimizer(target=cc,
+                              sigma=sigma,
+                              weights=weights,
+                              max_iter=max_coord_iter,
+                              lr=lr,
+                              patience=patience,
+                              min_delta=min_delta)
     for _ in range(max_alt_iter):
         reducer.reduce()
         if reducer.stop:
             break
-        opt.fit(plg, verbose=True)
+        opt.fit(plg, verbose=False)
     return plg

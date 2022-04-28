@@ -45,8 +45,8 @@ class Base2DPolygonRasterizer(Rasterizer, nn.Module):
         # transform by offset and scale
         polygon = torch.as_tensor(polygon, dtype=torch.float64)
         polygon = (polygon - self._offset) * self._scale
-        self.update_xy_lim(polygon)
 
+        self.update_xy_lim(polygon.to(torch.device('cpu')))
         # scan line algorithm
         scan = self._scan_along_x(polygon.to(torch.device('cpu')))
 
@@ -84,14 +84,14 @@ class Base2DPolygonRasterizer(Rasterizer, nn.Module):
                 continue
 
             for j in range(self.array_size[1]):
-                if j < self.x_min - self._threshold \
-                   or j > self.x_max + self._threshold:
+                if j < self.x_min - self._threshold or j > self.x_max + self._threshold:
                     continue
 
-                d_square_min = \
-                    self.square_euclidean_p_to_plg(point=(j, i), polygon=polygon)
-                map_[i, j] = 0 if d_square_min >= self._threshold * self._threshold and indicator[i, j] < 0 \
-                             else torch.sigmoid(indicator[i, j] * d_square_min / self._sigma)
+                d_square_min = self.square_euclidean_p_to_plg(point=(j, i), polygon=polygon)
+                if d_square_min >= self._threshold * self._threshold and indicator[i, j] < 0:
+                    map_[i, j] = 0
+                else:
+                    map_[i, j] = torch.sigmoid(indicator[i, j] * d_square_min / self._sigma)
         return map_
 
     @staticmethod
