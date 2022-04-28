@@ -133,6 +133,6 @@ if __name__ == "__main__":
     # Init
     open_cc, boundary_cc, room_cc = vec.extract_connected_components(seg)
 
-    run(open_cc, PCAFitter(size_estimator='min_max'))
-    # run(open_cc, SoftRasFitter(iou_target=0.8, lr=0.01, patience=3, max_iter=5))
+    # run(open_cc, PCAFitter(size_estimator='min_max'))
+    run(open_cc, SoftRasFitter(iou_target=0.8, lr=0.01, patience=3, max_iter=5))
 

@@ -19,6 +19,8 @@ from ..geometry import distance_seg_to_segments, project_seg_to_seg
 from ..optimize.objective import log_iou
 from ..optimize.softras import FixedCenterRectangle2DRasterizer as RectangleRasterizer
 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 
 ###########################################
 # fitting rectangles
@@ -124,9 +126,9 @@ class SoftRasFitter(RectangleFitter):
                                                mode="soft euclidean")
 
         self._w, self._h = component.width_height
-        self._w = torch.tensor(self._w, dtype=torch.float64, requires_grad=True)
-        self._h = torch.tensor(self._h, dtype=torch.float64, requires_grad=True)
-        self._theta = torch.tensor(0, dtype=torch.float64, requires_grad=True)
+        self._w = torch.tensor(self._w, dtype=torch.float64, requires_grad=True, device=device)
+        self._h = torch.tensor(self._h, dtype=torch.float64, requires_grad=True, device=device)
+        self._theta = torch.tensor(0, dtype=torch.float64, requires_grad=True, device=device)
 
         self._optimizer = RMSprop([self._w, self._h, self._theta], lr=self._lr)
 
@@ -176,15 +178,15 @@ class SoftRasFitter(RectangleFitter):
 
     @property
     def w(self):
-        return self._w.detach().numpy()
+        return self._w.detach().cpu().numpy()
 
     @property
     def h(self):
-        return self._h.detach().numpy()
+        return self._h.detach().cpu().numpy()
 
     @property
     def theta(self):
-        return self._theta.detach().numpy()
+        return self._theta.detach().cpu().numpy()
 
     @property
     def result(self):

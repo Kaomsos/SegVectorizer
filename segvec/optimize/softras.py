@@ -8,6 +8,8 @@ from torch import nn, Tensor
 
 from ..geometry import intersection_given_x_plg, distance_p_to_plg, get_segments, get_bounding_box_t
 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 
 class Rasterizer(ABC):
     @abstractmethod
@@ -26,10 +28,10 @@ class Base2DPolygonRasterizer(Rasterizer, nn.Module):
                  ) -> None:
         super().__init__()
         self._image_size = image_size
-        self._sigma = torch.as_tensor(sigma)
-        self._offset = torch.as_tensor(offset)
-        self._scale = torch.as_tensor(scale)
-        self._threshold = torch.as_tensor(threshold)
+        self._sigma = torch.as_tensor(sigma).to(device)
+        self._offset = torch.as_tensor(offset).to(device)
+        self._scale = torch.as_tensor(scale).to(device)
+        self._threshold = torch.as_tensor(threshold).to(device)
         self._mode = mode
 
     def forward(self, x):
@@ -46,7 +48,7 @@ class Base2DPolygonRasterizer(Rasterizer, nn.Module):
         self.update_xy_lim(polygon)
 
         # scan line algorithm
-        scan = self._scan_along_x(polygon)
+        scan = self._scan_along_x(polygon.to(torch.device('cpu')))
 
         # soft ras
         if self._mode == "hard assign":
@@ -98,6 +100,7 @@ class Base2DPolygonRasterizer(Rasterizer, nn.Module):
 
     @staticmethod
     def square_euclidean_p_to_plg(point: Tensor | Tuple[int, int], polygon: Tensor):
+        point = torch.as_tensor(point, device=device)
         return distance_p_to_plg(point, polygon, square=True)
 
     def fill_tensor(self, ts, x, y_s, y_e):
@@ -172,7 +175,7 @@ class FixedCenterRectangle2DRasterizer(Base2DPolygonRasterizer):
                                                                offset=offset,
                                                                scale=scale,
                                                                mode=mode)
-        self._center = torch.as_tensor(center)
+        self._center = torch.as_tensor(center).to(device)
 
     def rasterize(self, w: Tensor, h: Tensor, theta: Tensor) -> ArrayLike:
         offset = torch.stack([w, h], dim=0)
