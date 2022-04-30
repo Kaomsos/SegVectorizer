@@ -1,9 +1,21 @@
 import json
 import pickle
 import numpy as np
-from segvec.entity.wall_center_line import WallCenterLineWithOpenPoints
+from segvec.entity.wall_center_line import WallCenterLineWithOpenPoints, WallCenterLine
 from pathlib import Path
 from segvec.geometry import rasterize_polygon
+from segvec.main_steps.open_points import PCAFitter
+from segvec.main_steps.wall_center_line import alternating_optimize as fit_wall_center_line
+
+import logging
+import warnings
+from pathlib import Path
+import pickle
+from common import iou, precision, recall, p_config, Vectorizer
+
+vec = Vectorizer(palette_config=p_config)
+warnings.filterwarnings('ignore')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
 
 def get_polygon_of_wall(edge, width) -> np.ndarray:
@@ -33,10 +45,36 @@ def load_wcl_o(path):
     return obj
 
 
-if __name__ == '__main__':
-    shape = 500, 500
-    wcl_o: WallCenterLineWithOpenPoints = load_wcl_o('../experiments/raw_demo/2_1k8_wcl.pickle')
+def get_wall_center_line(seg, config=None):
+    open_cc, boundary_cc, room_cc = vec.extract_connected_components(seg)
+    rects = vec.get_rectangles(open_cc, PCAFitter(size_estimator='gaussian'))
+    vec.set_hyper_parameters_by_rectangles(rects)
+    room_contours = vec.get_room_contours(room_cc)
 
-    rast = rasterize_wcl(wcl_o, shape)
-    from segvec.utils import *
-    pass
+    # logging.info(f'start fitting wall center line {name}')
+    wcl = fit_wall_center_line(WallCenterLine(room_contours),
+                               delta_x=vec._delta_x,
+                               delta_y=vec._delta_y,
+                               boundary=boundary_cc,
+                               downscale=vec._downscale,
+                               max_alt_iter=5,
+                               max_coord_iter=100,
+                               lr=0.01,
+                               patience=3,
+                               min_delta=0.,
+                               weights=(1, 0, 0),
+                               **config,
+                               )
+
+    vec.set_widths_of_wcl(wcl, boundary_cc)
+    return wcl
+
+
+if __name__ == '__main__':
+    segs = load_wcl_o('exp_data/list_refined_segs.pickle')
+    for seg in segs[:1]:
+        wcl = get_wall_center_line(seg)
+        rast = rasterize_wcl(wcl, seg.shape)
+        from segvec.utils import *
+
+        pass

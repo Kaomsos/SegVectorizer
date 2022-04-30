@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from ..typing_ import WallCenterLine, SingleConnectedComponent
 
@@ -69,6 +70,9 @@ class CoordinateOptimizer:
                  max_iter: int = 5,
                  lr: float = 0.1,
                  downscale: int = 4,
+                 weights=None,
+                 patience=None,
+                 min_delta=None,
                  ) -> None:
         self._center = center
         self._nearby = nearby
@@ -79,13 +83,19 @@ class CoordinateOptimizer:
         self._target = None
         self._downscale = downscale
         self._optimizer = None
-        self._w1 = 1
-        self._w2 = 2
-        self._w3 = 1
+        if weights is None:
+            self._w1, self._w2, self._w3 = 1, 2, 1
+        else:
+            self._w1, self._w2, self._w3 = weights
         self._max_iter = max_iter
         self._i = None
         self._verbose = False
         self._lr = lr
+        self._patience = patience
+        self._min_delta = min_delta
+        if self._patience is not None:
+            assert isinstance(self._patience, int)
+            assert isinstance(self._min_delta, float)
 
     def fit(self,
             target: SingleConnectedComponent | np.ndarray,
@@ -94,9 +104,18 @@ class CoordinateOptimizer:
         self._verbose = verbose
         self._target = target
         self._fit_init(target)
+        loss_history = []
         for i in range(self._max_iter):
             self._i = i
             L = self._objective()
+
+            loss_history.append(L.detach().cpu().numpy())
+            if self._patience is not None and len(loss_history) >= self._patience:
+                if check_loss_history(loss_history, min_delta=self._min_delta):
+                    loss_history.pop(0)
+                else:
+                    break
+
             L.backward()
             self._optimizer.step()
             self._hook_after_step()
@@ -127,11 +146,22 @@ class CoordinateOptimizer:
 
     def _objective(self) -> torch.Tensor:
         # compute objectives
-        center = self._center((self.S @ self.V, self.E @ self.V),
-                              self.boundaries,
-                              downscale_factor=self._downscale)
-        nearby = self._nearby(self.V, self.P, self.L)
-        alignment = self._alignment(self.EDGES @ self.V)
+        if self._w1 != 0:
+            center = self._center((self.S @ self.V, self.E @ self.V),
+                                  self.boundaries,
+                                  downscale_factor=self._downscale)
+        else:
+            center = torch.tensor(0., requires_grad=True)
+
+        if self._w2 != 0:
+            nearby = self._nearby(self.V, self.P, self.L)
+        else:
+            nearby = torch.tensor(0., requires_grad=True)
+
+        if self._w3 != 0:
+            alignment = self._alignment(self.EDGES @ self.V)
+        else:
+            alignment = torch.tensor(0., requires_grad=True)
 
         loss = self._w1 * center + self._w2 * nearby + self._w3 * alignment
         return loss
@@ -156,16 +186,38 @@ class CoordinateOptimizer:
         return self.V.detach().numpy()
 
 
+def check_loss_history(history, min_delta=0):
+    # return True if continue
+    assert len(history) >= 2
+    base = history[0]
+    for x in history[1:]:
+        if base - x > min_delta:
+            return True
+    return False
+
+
 def alternating_optimize(wcl: WallCenterLine,
                          boundary: np.ndarray,
                          delta_x: float = 10,
                          delta_y: float = 10,
                          downscale: int = 4,
                          max_alt_iter: int = 5,
-                         max_coord_iter: int = 10
+                         max_coord_iter: int = 10,
+                         weights=None,
+                         lr=0.1,
+                         patience=None,
+                         min_delta=None
                          ) -> WallCenterLine:
+
     reducer = VertexReducer(wcl, delta_x, delta_y)
-    optimizer = CoordinateOptimizer(wcl, downscale=downscale, max_iter=max_coord_iter, lr=0.1)
+    optimizer = CoordinateOptimizer(wcl,
+                                    downscale=downscale,
+                                    max_iter=max_coord_iter,
+                                    weights=weights,
+                                    lr=lr,
+                                    patience=patience,
+                                    min_delta=min_delta,
+                                    )
 
     # iterating for at most max_iter
     for i in range(max_alt_iter):
