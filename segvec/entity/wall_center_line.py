@@ -280,7 +280,7 @@ class WallCenterLineWithOpenPoints(WallCenterLine):
         return [np.stack(self.get_coordinates_by_e(e)) for e in set(self.edges) - set(self._open_edge)]
 
     @property
-    def json(self):
+    def json(self) -> dict:
         coord = self._cur_coordinates.tolist()
 
         vertices = list(self._adjacency_list.keys())
@@ -298,10 +298,10 @@ class WallCenterLineWithOpenPoints(WallCenterLine):
         json = {
             "Nodes": [dict(id=id_, coordinate=c) for id_, c in zip(vertices, coord)],
 
-            "Edges": [dict(node1=ends[0], node2=ends[1], type='wall', width=self._widths[ends]) for ends in walls]
-                     + [dict(node1=ends[0], node2=ends[1], type='door', width=self._widths[ends]) for ends in doors]
-                     + [dict(node1=ends[0], node2=ends[1], type='window', width=self._widths[ends]) for ends in windows]
-                     + [dict(node1=ends[0], node2=ends[1], type='open', width=self._widths[ends]) for ends in opens],
+            "Edges": [dict(node1=ends[0], node2=ends[1], type='wall', width=self._widths[ends].tolist()) for ends in walls]
+                     + [dict(node1=ends[0], node2=ends[1], type='door', width=self._widths[ends].tolist()) for ends in doors]
+                     + [dict(node1=ends[0], node2=ends[1], type='window', width=self._widths[ends].tolist()) for ends in windows]
+                     + [dict(node1=ends[0], node2=ends[1], type='open', width=self._widths[ends].tolist()) for ends in opens],
 
             "Rooms": [dict(contour=contour, type=type_) for contour, type_ in zip(rooms, room_types)],
         }

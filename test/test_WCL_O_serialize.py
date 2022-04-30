@@ -8,6 +8,8 @@ class TestSerialization(unittest.TestCase):
         wcl_o = load_wcl_o('../experiments/raw_demo/2_1k8_wcl.pickle')
         self.assertIsInstance(wcl_o, WallCenterLineWithOpenPoints)
         self.assertIsInstance(wcl_o.json, dict)
+        dict_ = wcl_o.json
+        pass
 
 
 def load_wcl_o(path):
