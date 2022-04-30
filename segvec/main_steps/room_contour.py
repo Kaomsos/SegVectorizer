@@ -192,7 +192,7 @@ class CoordinateOptimizer:
         :param verbose:
         :return:
         """
-        self._P = plg.torch_tensor.clone().detach().requires_grad_(True)
+        self._P = plg.torch_tensor.clone().to(device).detach().requires_grad_(True)
         self._optimizer = RMSprop([self._P], lr=self._lr)
         self._verbose = verbose
 
