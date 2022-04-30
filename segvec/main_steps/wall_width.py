@@ -24,11 +24,17 @@ def get_two_means(X: np.ndarray):
     return fitter.means_.reshape(-1).tolist()
 
 
-def rasterize_by_rec_center(arr_shape, center_line: Segment, width: float):
+def rasterize_by_rec_center(arr_shape, center_line: Segment, width: float, shrink: float = None):
     p1, p2 = np.array(center_line)
     vec = p1 - p2
     normal_vec = np.array([vec[1], -vec[0]]) / np.sqrt((vec * vec).sum())
     delta = normal_vec * width / 2
+    if shrink is not None:
+        assert 0 < shrink < 1
+        ratio = shrink / 2
+        p1_ = p1 * (1 - ratio) + p2 * ratio
+        p2_ = p1 * ratio + p2 * (1 - ratio)
+        p1, p2 = p1_, p2_
     polygon = np.vstack([p1, p1, p2, p2]) + np.vstack([delta, -delta, -delta, delta])
     return rasterize_polygon(arr_shape, polygon)
 
@@ -92,7 +98,7 @@ class WallWidthSolver:
 
             self._threshold = round(threshold)
 
-        self._mask = rasterize_by_rec_center(self._arr_shape, edge, self._max * 1.5)
+        self._mask = rasterize_by_rec_center(self._arr_shape, edge, self._max * 1.5, shrink=0.2)
 
         self._w1 = None
         self._w2 = None
