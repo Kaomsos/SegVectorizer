@@ -1,5 +1,5 @@
 from __future__ import annotations
-from experiments.common import iou, precision, recall, p_config, Vectorizer
+from common import iou, precision, recall, p_config, Vectorizer
 from segvec.vetorizer import fit_room_contour
 from segvec.main_steps.open_points import PCAFitter
 

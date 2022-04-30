@@ -196,7 +196,6 @@ class WallCenterLine(UndirectedGraph):
     def set_width_by_e(self, e: Edge, width: float):
         self._widths[e] = width
 
-
     def _get_coordinates_by_ps(self, ps: List[Vertex]):
         indices = [self._v2i[self._p2v[p]] for p in ps]
         return self._cur_coordinates[indices]
@@ -286,30 +285,25 @@ class WallCenterLineWithOpenPoints(WallCenterLine):
 
         vertices = list(self._adjacency_list.keys())
         v2c = {v: coord[self._v2i[v]] for v in vertices}
-        opens = list(filter(lambda x: x[0] <= x[1], self._open_edge))
+
         doors = list(filter(lambda x: x[0] <= x[1], self._door_edge))
         windows = list(filter(lambda x: x[0] <= x[1], self._window_edge))
+        opens = list(set(filter(lambda x: x[0] <= x[1], self._open_edge)) - (set(doors) | set(windows)))
+
         walls = list(set(self.edges) - set(self._open_edge))
 
         rooms = [[self._p2v[p] for p in room] for room in self._rooms]
-        i2r = dict(enumerate(rooms))
+        room_types = self.room_types
 
         json = {
-            "vertices": {
-                "all": vertices,
-                "coordinate": v2c,
-            },
+            "Nodes": [dict(id=id_, coordinate=c) for id_, c in zip(vertices, coord)],
 
-            "edges": {
-                "door": doors,
-                "window": windows,
-                "wall": walls,
-            },
+            "Edges": [dict(node1=ends[0], node2=ends[1], type='wall', width=self._widths[ends]) for ends in walls]
+                     + [dict(node1=ends[0], node2=ends[1], type='door', width=self._widths[ends]) for ends in doors]
+                     + [dict(node1=ends[0], node2=ends[1], type='window', width=self._widths[ends]) for ends in windows]
+                     + [dict(node1=ends[0], node2=ends[1], type='open', width=self._widths[ends]) for ends in opens],
 
-            "rooms": {
-                "all": list(i2r.keys()),
-                "contour": i2r,
-            },
+            "Rooms": [dict(contour=contour, type=type_) for contour, type_ in zip(rooms, room_types)],
         }
         return json
 

@@ -77,7 +77,7 @@ class Base2DPolygonRasterizer(Rasterizer, nn.Module):
     def _compute_prob_map(self, polygon: Tensor, scan: Tensor):
         indicator = torch.where(scan, 1, -1)
         # d_square_min = torch.zeros(self.array_size, dtype=torch.float64)
-        map_ = torch.zeros(self.array_size, dtype=torch.float64)
+        map_ = torch.zeros(self.array_size, dtype=torch.float64, device=torch.device('cpu'))
         for i in range(self.array_size[0]):
             if i < self.y_min - self._threshold \
                or i > self.y_max + self._threshold:

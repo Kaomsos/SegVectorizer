@@ -192,7 +192,7 @@ class CoordinateOptimizer:
         :param verbose:
         :return:
         """
-        self._P = torch.as_tensor(plg.torch_tensor, device=device)
+        self._P = plg.torch_tensor.clone().detach().requires_grad_(True)
         self._optimizer = RMSprop([self._P], lr=self._lr)
         self._verbose = verbose
 
@@ -222,7 +222,7 @@ class CoordinateOptimizer:
     def _objective(self) -> torch.Tensor:
         if self._w1 != 0:
             rast = self._rasterize(self._P)
-            target = torch.as_tensor(self._cc.array, device=device)
+            target = torch.tensor(self._cc.array, device=device)
             iou = log_iou(rast, target)
         else:
             iou = torch.tensor(0., requires_grad=True)
@@ -261,7 +261,7 @@ class CoordinateOptimizer:
 
     @property
     def optimized_result(self):
-        return self._P.detach().numpy()
+        return self._P.detach().cpu().numpy()
 
 
 def check_loss_history(history, min_delta=0):

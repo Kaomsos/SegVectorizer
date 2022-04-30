@@ -10,7 +10,7 @@ import time
 import pickle
 import logging
 
-from experiments.common import iou, precision, recall, p_config, Vectorizer
+from common import iou, precision, recall, p_config, Vectorizer
 
 
 def run(open_cc_list: typing.List[SingleConnectedComponent],

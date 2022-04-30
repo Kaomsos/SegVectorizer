@@ -13,8 +13,8 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 def log_iou(rendered, target, epsilon=1) -> torch.Tensor:
-    true = torch.as_tensor(target)
-    pred = torch.as_tensor(rendered)
+    true = torch.as_tensor(target).to(device)
+    pred = torch.as_tensor(rendered).to(device)
 
     I = torch.minimum(true, pred)
     U = torch.maximum(true, pred)
