@@ -51,7 +51,7 @@ def serialize_all():
     root = Path('raw_demo')
     for path in root.iterdir():
         if path.is_file() and path.suffix == '.pickle':
-            wcl_o: WallCenterLineWithOpenPoints = load_wcl_o('../experiments/raw_demo/2_1k8_wcl.pickle')
+            wcl_o: WallCenterLineWithOpenPoints = load_wcl_o(path)
             dict_ = wcl_o.json
 
             rooms = dict_.get('Rooms')
@@ -62,5 +62,5 @@ def serialize_all():
 
 
 if __name__ == '__main__':
-    pass
+    serialize_all()
 
