@@ -68,7 +68,7 @@ def get_wall_center_line(seg, config={}):
                                lr=0.1,
                                patience=3,
                                min_delta=0.,
-                               weights=(1, 2, 1),
+                               weights=(0, 2, 1),
                                **config,
                                )
 
@@ -77,8 +77,11 @@ def get_wall_center_line(seg, config={}):
 
 
 def run(segs, config={}):
-    for seg in segs[:1]:
+    global record
 
+    for i, seg in enumerate(segs[:1]):
+
+        logging.info(f'processing the {i}th in segmentation list')
         s = time.time_ns()
         wcl, target = get_wall_center_line(seg)
         e = time.time_ns()
@@ -117,6 +120,10 @@ def after_run_hook():
 
 
 if __name__ == '__main__':
+    from config_wcl_ablation import *
+
+    save_path = ''
     segs = load_wcl_o('exp_data/list_refined_segs.pickle')
-    run(segs)
+
+    run(segs, w_o)
 
