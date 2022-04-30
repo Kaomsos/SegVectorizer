@@ -137,14 +137,14 @@ class WallWidthSolver:
         f = [0, self._iou(1)]
         for w in itertools.count(2):
             f.append(self._iou(w))
-            if f[-3] > f[-2] > f[-1]:
+            if w > self._max or f[-3] > f[-2] > f[-1]:
                 break
         w1 = np.argmax(f)
 
         f = [0, self._reverse_iou(1)]
         for w in itertools.count(2):
             f.append(self._reverse_iou(w))
-            if f[-3] > f[-2] > f[-1]:
+            if w > self._max - w1 or f[-3] > f[-2] > f[-1]:
                 break
         w2 = np.argmax(f)
         return w1, w2
